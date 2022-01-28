@@ -36,6 +36,8 @@ public class Arena : MonoBehaviour
 
     private void Update()
     {
+        if (snakes.Count == 0) return;
+
         foreach(var snake in snakes)
         {
             var lastPos = snake.Position;
@@ -63,25 +65,40 @@ public class Arena : MonoBehaviour
         int minY = (int)Mathf.Max(0, (Mathf.Min(start.y, end.y) - thickness));
         int maxY = (int)Mathf.Min(pixelHeight, (Mathf.Max(start.y, end.y) + thickness));
 
-        for (int x = minX; x < maxX; x++)
+        for (int y = minY; y < maxY; y++)
         {
-            for(int y = minY; y < maxY; y++)
+            bool filled = false;
+            for(int x = minX; x < maxX; x++)
             {
-                if(DistToLine(new Vector2(x, y), start, end) <= thickness)
+                float dist = DistToLine(new Vector2(x, y), start, end);
+                if (dist <= thickness) // inside snake
                 {
+                    filled = true;
                     int idx = CoordinatesToIndex(x, y);
-                    if (pixels[idx].a > 0)
+
+                    if (pixels[idx].a > 0) // hit something
                     {
-                        //// collision
-                        //Debug.Log(color + " collided with " + pixels[idx]);
-                        //Snake snakeA = GetSnakeByColor(color);
-                        //Snake snakeB = GetSnakeByColor(pixels[idx]);
-                        //CollisionEvent?.Invoke(snakeA, snakeB);
-                        //snakes.Remove(snakeA);
+                        if(Vector2.Distance(new Vector2(x, y), start) > thickness) // hit is not overlap. collision! why is this not working?
+                        {
+                            // collision
+                            Debug.Log(color + " collided with " + pixels[idx]);
+                            Snake snakeA = GetSnakeByColor(color);
+                            Snake snakeB = GetSnakeByColor(pixels[idx]);
+                            CollisionEvent?.Invoke(snakeA, snakeB);
+                            snakes.Remove(snakeA);
+                            return;
+                        }
                     }
                     else
                     {
                         pixels[idx] = color;
+                    }
+                }
+                else // outside snake
+                {
+                    if (filled) // break out early if we are done for the row
+                    {
+                        break;
                     }
                 }
             }
@@ -90,9 +107,10 @@ public class Arena : MonoBehaviour
 
     float DistToLine(Vector2 point, Vector2 a, Vector2 b)
     {
-        Vector2 pa = point - a, ba = b - a;
-        float h = Mathf.Max(0, Mathf.Min(1, Vector2.Dot(pa, ba) / Vector2.Dot(ba, ba)));
-        Vector2 d = pa - ba * h;
+        Vector2 ap = point - a, ab = b - a;
+        float h = Mathf.Max(0, Mathf.Min(1, Vector2.Dot(ap, ab) / Vector2.Dot(ab, ab)));
+        //float h = Mathf.Max(0, Mathf.Min(1, Vector2.Dot(ap, ab) / Vector2.SqrMagnitude(ab)));
+        Vector2 d = ap - ab * h;
         return Vector2.Dot(d, d);
     }
 

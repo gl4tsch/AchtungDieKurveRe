@@ -175,8 +175,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   image: {fileID: 3615670}
-  pixelWidth: 1024
-  pixelHeight: 1024
+  pixelWidth: 256
+  pixelHeight: 256
   snakeThickness: 50
 --- !u!222 &3615669
 CanvasRenderer:

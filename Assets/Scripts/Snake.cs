@@ -7,7 +7,7 @@ public class Snake
     public Vector2 Position { get; set; }
     public Vector2 Direction { get; set; }
     public Color32 Color { get; private set; }
-    public float Thickness { get; private set; } = 5;
+    public float Thickness { get; private set; } = 20;
     public float Speed { get; private set; } = 100f;
     public float TurnRate { get; private set; } = 100f;
 
