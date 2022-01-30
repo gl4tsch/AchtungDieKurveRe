@@ -1,0 +1,36 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct SnakeData
+{
+    float2 prevPos, newPos;
+    float thickness;
+    float4 color;
+};
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Arena;
+
+StructuredBuffer<SnakeData> _Snakes;
+int _Width, _Height;
+int _SnakeCount;
+
+float SqrDistToLine( float2 p, float2 a, float2 b )
+{
+    float2 pa = p-a, ba = b-a;
+    float h = saturate( dot(pa,ba)/dot(ba,ba) );
+    float2 d = pa - ba * h;
+    return dot(d,d);
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    for(int i = 0; i < _SnakeCount; i++)
+    {
+        float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
+        float k = SqrDistToLine(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
+        Arena[id.xy] = k <= _Snakes[i].thickness * _Snakes[i].thickness ? _Snakes[i].color : Arena[id.xy];
+    }
+}

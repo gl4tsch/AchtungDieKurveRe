@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Arena : MonoBehaviour
+public class ArenaCPU : MonoBehaviour
 {
     [SerializeField] RawImage image;
     [SerializeField] int pixelWidth, pixelHeight;
-    [SerializeField] int snakeThickness;
 
     public event System.Action<Snake, Snake> CollisionEvent;
 
     Texture2D tex;
     Color32[] pixels;
     List<Snake> snakes = new List<Snake>();
+
+    RenderTexture renderTex;
 
     private IEnumerator Start()
     {
