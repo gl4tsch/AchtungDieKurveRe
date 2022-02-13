@@ -1,18 +1,20 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
+#pragma kernel CSBorder
 
 struct SnakeData
 {
     float2 prevPos, newPos;
     float thickness;
     float4 color;
+    float4 collision;
 };
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Arena;
 
-StructuredBuffer<SnakeData> _Snakes;
+RWStructuredBuffer<SnakeData> _Snakes;
 int _Width, _Height;
 int _SnakeCount;
 
@@ -24,13 +26,57 @@ float SqrDistToLine( float2 p, float2 a, float2 b )
     return dot(d,d);
 }
 
+float sdSegment( float2 p, float2 a, float2 b )
+{
+    float2 pa = p-a, ba = b-a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h );
+}
+
+float sdArc( float2 p, float2 sc, float ra, float rb )
+{
+    // sc is the sin/cos of the arc's aperture
+    p.x = abs(p.x);
+    return ((sc.y*p.x>sc.x*p.y) ? length(p-sc*ra) : abs(length(p)-ra)) - rb;
+}
+
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     for(int i = 0; i < _SnakeCount; i++)
     {
         float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
-        float k = SqrDistToLine(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
-        Arena[id.xy] = k <= _Snakes[i].thickness * _Snakes[i].thickness ? _Snakes[i].color : Arena[id.xy];
+        float k = sdSegment(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
+
+        // to avoid self-collision
+        float distToSegmentStart = length(_Snakes[i].prevPos - uv);
+
+        if(k <= _Snakes[i].thickness)
+        {
+            if(distToSegmentStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
+            {
+                _Snakes[i].collision = Arena[id.xy];
+            }
+            Arena[id.xy] = _Snakes[i].color;
+        }
+
+        //Arena[id.xy] = k <= _Snakes[i].thickness ? _Snakes[i].color : Arena[id.xy];
+    }
+}
+
+[numthreads(8,8,1)]
+void CSBorder (uint3 id : SV_DispatchThreadID)
+{
+    float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
+    float normBorderX = 2.0/_Width;
+    float normBorderY = 2.0/_Height;
+
+    if(uv.x <= normBorderX || uv.x >= 1-normBorderX || uv.y <= normBorderY || uv.y >= 1-normBorderY)
+    {
+        Arena[id.xy] = float4(1,1,1,1);
+    }
+    else
+    {
+        Arena[id.xy] = float4(0,0,0,0);
     }
 }

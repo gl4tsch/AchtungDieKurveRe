@@ -35,5 +35,6 @@ public class Snake
         public Vector2 prevPos, newPos;
         public float thickness;
         public Vector4 color;
+        public Vector4 collision;
     }
 }

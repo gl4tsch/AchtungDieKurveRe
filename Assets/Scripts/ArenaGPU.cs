@@ -18,7 +18,7 @@ public class ArenaGPU : MonoBehaviour
 
     private void OnEnable()
     {
-        snakeBuffer = new ComputeBuffer(3, sizeof(float) * 9);
+        snakeBuffer = new ComputeBuffer(3, sizeof(float) * 13);
     }
 
     private void OnDisable()
@@ -27,16 +27,12 @@ public class ArenaGPU : MonoBehaviour
         snakeBuffer = null;
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
-        renderTex = new RenderTexture(pixelWidth, pixelHeight, 0);
-        renderTex.enableRandomWrite = true;
-        renderTex.Create();
-        cs.SetTexture(0, "Arena", renderTex);
-        cs.SetInt("_Width", pixelWidth);
-        cs.SetInt("_Height", pixelHeight);
-        cs.SetInt("_SnakeCount", 3);
-        image.texture = renderTex;
+        PrepareRenderTex();
+        snakes.Clear();
+
+        yield return new WaitForSeconds(1);
 
         snakes = new List<Snake>
         {
@@ -48,8 +44,33 @@ public class ArenaGPU : MonoBehaviour
         RandomStartPositions();
     }
 
+    private void PrepareRenderTex()
+    {
+        // create render texture
+        if (renderTex != null) renderTex.Release();
+        renderTex = new RenderTexture(pixelWidth, pixelHeight, 0);
+        renderTex.enableRandomWrite = true;
+        renderTex.Create();
+        image.texture = renderTex;
+
+        // prepare compute shader
+        cs.SetTexture(0, "Arena", renderTex);
+        cs.SetTexture(1, "Arena", renderTex);
+        cs.SetInt("_Width", pixelWidth);
+        cs.SetInt("_Height", pixelHeight);
+        cs.SetInt("_SnakeCount", 3);
+
+        // fill arena border
+        cs.Dispatch(1, pixelWidth / 8, pixelHeight / 8, 1);
+    }
+
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            StartCoroutine(Start());
+        }
+
         if (snakes.Count == 0) return;
 
         SnakeData[] snakesData = new SnakeData[snakes.Count];
@@ -68,6 +89,7 @@ public class ArenaGPU : MonoBehaviour
         }
 
         DrawSnakes(snakesData);
+        ReadCollisions(ref snakesData);
     }
 
     void DrawSnakes(SnakeData[] data)
@@ -75,6 +97,19 @@ public class ArenaGPU : MonoBehaviour
         snakeBuffer.SetData(data);
         cs.SetBuffer(0, "_Snakes", snakeBuffer);
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);
+    }
+
+    void ReadCollisions(ref SnakeData[] data)
+    {
+        snakeBuffer.GetData(data);
+        foreach (var snake in data)
+        {
+            if (snake.collision.w > 0)
+            {
+                Debug.Log(snake.color + " collided with " + snake.collision);
+                snakes.Remove(GetSnakeByColor((Color)snake.color));
+            }
+        }
     }
 
     void RandomStartPositions()
@@ -86,23 +121,8 @@ public class ArenaGPU : MonoBehaviour
         }
     }
 
-    Vector2Int IndexToCoordinates(int index)
-    {
-        return new Vector2Int(index % pixelHeight, index / pixelWidth);
-    }
-
-    int CoordinatesToIndex(int x, int y)
-    {
-        return x + pixelWidth * y;
-    }
-
     Snake GetSnakeByColor(Color32 col)
     {
         return snakes.Find(s => s.Color.Equals(col));
-    }
-
-    void ClearTexture()
-    {
-        // TODO
     }
 }
