@@ -42,7 +42,7 @@ public class ArenaCPU : MonoBehaviour
         foreach(var snake in snakes)
         {
             var lastPos = snake.Position;
-            snake.UpdatePosition(-1);
+            snake.UpdatePosition();
             var newPos = snake.Position;
             DrawLine(lastPos, newPos, snake.Thickness, snake.Color);
         }

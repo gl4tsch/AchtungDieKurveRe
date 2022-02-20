@@ -13,7 +13,6 @@ public class ArenaGPU : MonoBehaviour
     public event System.Action<Snake, Snake> CollisionEvent;
 
     RenderTexture renderTex;
-    List<Snake> snakes = new List<Snake>();
     ComputeBuffer snakeBuffer;
 
     private void OnEnable()
@@ -30,16 +29,13 @@ public class ArenaGPU : MonoBehaviour
     private IEnumerator Start()
     {
         PrepareRenderTex();
-        snakes.Clear();
+        Snakes.Clear();
 
         yield return new WaitForSeconds(1);
 
-        snakes = new List<Snake>
-        {
-            new Snake(Color.red),
-            new Snake(Color.green),
-            new Snake(Color.blue)
-        };
+        new Snake(Color.red);
+        new Snake(Color.green);
+        new Snake(Color.blue);
 
         RandomStartPositions();
     }
@@ -66,20 +62,15 @@ public class ArenaGPU : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Snakes.Count == 0) return;
+
+        SnakeData[] snakesData = new SnakeData[Snakes.Count];
+
+        for (int i = 0; i < Snakes.Count; i++)
         {
-            StartCoroutine(Start());
-        }
-
-        if (snakes.Count == 0) return;
-
-        SnakeData[] snakesData = new SnakeData[snakes.Count];
-
-        for (int i = 0; i < snakes.Count; i++)
-        {
-            var snake = snakes[i];
+            var snake = Snakes[i];
             var prevPos = snake.Position / pixelWidth;
-            snake.UpdatePosition(-1);
+            snake.UpdatePosition();
             var newPos = snake.Position / pixelWidth;
             snakesData[i] = new SnakeData();
             snakesData[i].prevPos = prevPos;
@@ -107,14 +98,14 @@ public class ArenaGPU : MonoBehaviour
             if (snake.collision.w > 0)
             {
                 Debug.Log(snake.color + " collided with " + snake.collision);
-                snakes.Remove(GetSnakeByColor((Color)snake.color));
+                Snakes.Remove(GetSnakeByColor((Color)snake.color));
             }
         }
     }
 
     void RandomStartPositions()
     {
-        foreach (var snake in snakes)
+        foreach (var snake in Snakes)
         {
             snake.Position = new Vector2(Random.Range(0, pixelWidth), Random.Range(0, pixelHeight));
             snake.Direction = Random.insideUnitCircle.normalized;
@@ -123,6 +114,6 @@ public class ArenaGPU : MonoBehaviour
 
     Snake GetSnakeByColor(Color32 col)
     {
-        return snakes.Find(s => s.Color.Equals(col));
+        return Snakes.Find(s => s.Color.Equals(col));
     }
 }

@@ -47,6 +47,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     {
         float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
         float k = sdSegment(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
+        float d = sdArc(uv, -0.0001, _Snakes[i].newPos, _Snakes[i].prevPos); // how on earth
 
         // to avoid self-collision
         float distToSegmentStart = length(_Snakes[i].prevPos - uv);
