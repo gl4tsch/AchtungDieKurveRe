@@ -33,9 +33,9 @@ public class ArenaGPU : MonoBehaviour
 
         yield return new WaitForSeconds(1);
 
-        new Snake(Color.red);
-        new Snake(Color.green);
-        new Snake(Color.blue);
+        new Snake();
+        new Snake();
+        new Snake();
 
         RandomStartPositions();
     }
@@ -107,8 +107,8 @@ public class ArenaGPU : MonoBehaviour
     {
         foreach (var snake in Snakes)
         {
-            snake.Position = new Vector2(Random.Range(0, pixelWidth), Random.Range(0, pixelHeight));
-            snake.Direction = Random.insideUnitCircle.normalized;
+            int travelInASec = (int)Settings.Instance.SnakeSpeed;
+            snake.Spawn(pixelWidth, pixelHeight, travelInASec);
         }
     }
 
