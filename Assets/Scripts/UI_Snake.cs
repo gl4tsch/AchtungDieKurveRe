@@ -70,4 +70,10 @@ public class UI_Snake : MonoBehaviour
 
         rebindOp.Start();
     }
+
+    public void Remove()
+    {
+        Snake.Delete();
+        Destroy(gameObject);
+    }
 }

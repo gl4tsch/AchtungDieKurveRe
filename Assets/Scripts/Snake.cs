@@ -8,7 +8,7 @@ public class Snake
     public string Name;
     public Vector2 Position { get; private set; }
     public Vector2 Direction { get; private set; }
-    public Color32 Color { get; private set; }
+    public Color Color { get; private set; }
     public float ThicknessModifier { get; private set; } = 0f;
     public float Thickness => Settings.Instance.SnakeThickness + ThicknessModifier;
     public float SpeedModifier { get; private set; } = 0f;
