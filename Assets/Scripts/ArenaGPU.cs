@@ -77,6 +77,7 @@ public class ArenaGPU : MonoBehaviour
 
     void DrawSnakes(Snake.SnakeDrawData[] data)
     {
+        // TODO: try to dispatch separately for every segment
         snakeBuffer.SetData(data);
         cs.SetBuffer(0, "_Snakes", snakeBuffer);
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);

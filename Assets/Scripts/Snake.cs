@@ -27,7 +27,7 @@ public class Snake
 
     public Snake()
     {
-        Color = Random.ColorHSV();
+        Color = Random.ColorHSV(0,1,0.5f,1,0.5f,1,1,1);
         Snakes.Add(this);
         Name = "Snake " + Snakes.IndexOf(this);
 
