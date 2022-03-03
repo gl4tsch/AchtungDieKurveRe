@@ -18,9 +18,12 @@ public class Snake
     public InputAction RightAction { get; private set; }
     public InputAction FireAction { get; private set; }
 
-    public static List<Snake> Snakes = new List<Snake>();
+    public static List<Snake> Snakes = new List<Snake>(); // this has to go somewhere else at some point
 
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
+    Vector2 prevPos;
+    float distSinceLastGap = 0;
+    bool gap => distSinceLastGap > Settings.Instance.SnakeGapFrequency;
 
     public Snake()
     {
@@ -48,9 +51,40 @@ public class Snake
 
     public void UpdatePosition()
     {
+        prevPos = Position;
         float degrees = Settings.Instance.SnakeTurnRate * turnSign * Time.deltaTime;
         Direction = Quaternion.Euler(0, 0, degrees) * Direction;
         Position += Direction * Settings.Instance.SnakeSpeed * Time.deltaTime;
+
+        // Gap
+        distSinceLastGap += Vector2.Distance(prevPos, Position);
+    }
+
+    // returns null if there is nothing to draw
+    public SnakeDrawData GetDrawData()
+    {
+        var arenaWidth = Settings.Instance.ArenaWidth;
+        var gapFreq = Settings.Instance.SnakeGapFrequency;
+        var gapWidth = Settings.Instance.SnakeGapWidth;
+
+        var data = new Snake.SnakeDrawData();
+
+        var prevDataPos = prevPos / arenaWidth;
+        var newDataPos = Position / arenaWidth;
+
+        data.oldPos = prevDataPos;
+        data.newPos = newDataPos;
+        data.thickness = Thickness / Settings.Instance.ArenaWidth;
+
+        data.color = new Vector4(Color.r, Color.g, Color.b, gap ? 0 : Color.a);
+
+        // close gap
+        if(distSinceLastGap > gapFreq + gapWidth)
+        {
+            distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
+        }
+
+        return data;
     }
 
     public void Delete()
@@ -58,9 +92,9 @@ public class Snake
         Snakes.Remove(this);
     }
 
-    public struct SnakeData
+    public struct SnakeDrawData
     {
-        public Vector2 prevPos, newPos;
+        public Vector2 oldPos, newPos;
         public float thickness;
         public Vector4 color;
         public Vector4 collision;

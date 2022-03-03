@@ -210,8 +210,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cs: {fileID: 7200000, guid: 4ee64c06464ea8e40907aac17c875c0a, type: 3}
   image: {fileID: 3615670}
-  pixelWidth: 1024
-  pixelHeight: 1024
 --- !u!1 &293285468
 GameObject:
   m_ObjectHideFlags: 0
@@ -1998,9 +1996,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73ee6067015b79f42b43adc11e0a6868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ArenaWidth: 1024
+  ArenaHeight: 1024
   SnakeSpeed: 100
   SnakeTurnRate: 150
   SnakeThickness: 5
+  SnakeGapFrequency: 200
+  SnakeGapWidth: 30
 --- !u!1 &1914852776
 GameObject:
   m_ObjectHideFlags: 0

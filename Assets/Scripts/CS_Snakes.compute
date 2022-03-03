@@ -46,22 +46,25 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     for(int i = 0; i < _SnakeCount; i++)
     {
         float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
-        float k = sdSegment(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
-        float d = sdArc(uv, -0.0001, _Snakes[i].newPos, _Snakes[i].prevPos); // how on earth
+        float distToSegment = sdSegment(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
+        //float d = sdArc(uv, -0.0001, _Snakes[i].newPos, _Snakes[i].prevPos); // how on earth
 
         // to avoid self-collision
-        float distToSegmentStart = length(_Snakes[i].prevPos - uv);
+        float distToStart = length(_Snakes[i].prevPos - uv);
 
-        if(k <= _Snakes[i].thickness)
+        // if this pixel is part of the current segment
+        if(distToSegment <= _Snakes[i].thickness)
         {
-            if(distToSegmentStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
+            // if the pixel is not the end of same snake from previous frame && the pixel has a value already
+            if(distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
             {
+                // COLLISION
                 _Snakes[i].collision = Arena[id.xy];
             }
+
+            // fill pixel
             Arena[id.xy] = _Snakes[i].color;
         }
-
-        //Arena[id.xy] = k <= _Snakes[i].thickness ? _Snakes[i].color : Arena[id.xy];
     }
 }
 

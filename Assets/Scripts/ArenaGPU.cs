@@ -7,7 +7,9 @@ public class ArenaGPU : MonoBehaviour
 {
     [SerializeField] ComputeShader cs;
     [SerializeField] RawImage image;
-    [SerializeField] int pixelWidth, pixelHeight;
+
+    int pixelWidth => Settings.Instance.ArenaWidth;
+    int pixelHeight => Settings.Instance.ArenaHeight;
 
     public event System.Action<Snake, Snake> CollisionEvent;
 
@@ -16,7 +18,7 @@ public class ArenaGPU : MonoBehaviour
 
     private void OnEnable()
     {
-        snakeBuffer = new ComputeBuffer(3, sizeof(float) * 13);
+        snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 13);
     }
 
     private void OnDisable()
@@ -49,7 +51,7 @@ public class ArenaGPU : MonoBehaviour
         cs.SetTexture(1, "Arena", renderTex);
         cs.SetInt("_Width", pixelWidth);
         cs.SetInt("_Height", pixelHeight);
-        cs.SetInt("_SnakeCount", 3);
+        cs.SetInt("_SnakeCount", Snake.Snakes.Count);
 
         // fill arena border
         cs.Dispatch(1, pixelWidth / 8, pixelHeight / 8, 1);
@@ -59,33 +61,28 @@ public class ArenaGPU : MonoBehaviour
     {
         if (Snake.Snakes.Count == 0) return;
 
-        Snake.SnakeData[] snakesData = new Snake.SnakeData[Snake.Snakes.Count];
+        Snake.SnakeDrawData[] snakesData = new Snake.SnakeDrawData[Snake.Snakes.Count];
 
         for (int i = 0; i < Snake.Snakes.Count; i++)
         {
             var snake = Snake.Snakes[i];
-            var prevPos = snake.Position / pixelWidth;
             snake.UpdatePosition();
-            var newPos = snake.Position / pixelWidth;
-            snakesData[i] = new Snake.SnakeData();
-            snakesData[i].prevPos = prevPos;
-            snakesData[i].newPos = newPos;
-            snakesData[i].thickness = snake.Thickness / pixelWidth;
-            snakesData[i].color = new Vector4(snake.Color.r, snake.Color.g, snake.Color.b, snake.Color.a);
+            var data = snake.GetDrawData();
+            snakesData[i] = data;
         }
 
         DrawSnakes(snakesData);
         ReadCollisions(ref snakesData);
     }
 
-    void DrawSnakes(Snake.SnakeData[] data)
+    void DrawSnakes(Snake.SnakeDrawData[] data)
     {
         snakeBuffer.SetData(data);
         cs.SetBuffer(0, "_Snakes", snakeBuffer);
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);
     }
 
-    void ReadCollisions(ref Snake.SnakeData[] data)
+    void ReadCollisions(ref Snake.SnakeDrawData[] data)
     {
         snakeBuffer.GetData(data);
         foreach (var snake in data)
