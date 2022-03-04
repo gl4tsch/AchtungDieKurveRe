@@ -23,7 +23,6 @@ public class Snake
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
     Vector2 prevPos;
     float distSinceLastGap = 0;
-    bool gap => distSinceLastGap > Settings.Instance.SnakeGapFrequency;
 
     public Snake()
     {
@@ -64,8 +63,6 @@ public class Snake
     public SnakeDrawData GetDrawData()
     {
         var arenaWidth = Settings.Instance.ArenaWidth;
-        var gapFreq = Settings.Instance.SnakeGapFrequency;
-        var gapWidth = Settings.Instance.SnakeGapWidth;
 
         var data = new Snake.SnakeDrawData();
 
@@ -76,13 +73,7 @@ public class Snake
         data.newPos = newDataPos;
         data.thickness = Thickness / Settings.Instance.ArenaWidth;
 
-        data.color = new Vector4(Color.r, Color.g, Color.b, gap ? 0 : Color.a);
-
-        // close gap
-        if(distSinceLastGap > gapFreq + gapWidth)
-        {
-            distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
-        }
+        data.color = new Vector4(Color.r, Color.g, Color.b, Color.a);
 
         return data;
     }

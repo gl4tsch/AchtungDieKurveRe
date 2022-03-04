@@ -15,16 +15,20 @@ public class ArenaGPU : MonoBehaviour
 
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
+    ComputeBuffer lineBuffer;
 
     private void OnEnable()
     {
         snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 13);
+        lineBuffer = new ComputeBuffer(Snake.Snakes.Count * 5, sizeof(float) * 13);
     }
 
     private void OnDisable()
     {
         snakeBuffer.Release();
         snakeBuffer = null;
+        lineBuffer.Release();
+        lineBuffer = null;
     }
 
     private IEnumerator Start()
