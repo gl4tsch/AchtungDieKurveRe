@@ -15,7 +15,7 @@ public class Settings : MonoBehaviour
     public float SnakeTurnRate = 150f;
     public float SnakeThickness = 5f;
     public float SnakeGapFrequency = 200f; // distance between gaps in pixels
-    public float SnakeGapWidth = 30f; // how wide is the gap
+    public float SnakeGapWidth = 20f; // how wide is the gap
 
     private void Awake()
     {

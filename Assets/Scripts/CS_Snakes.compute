@@ -55,8 +55,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         // if this pixel is part of the current segment
         if(distToSegment <= _Snakes[i].thickness)
         {
-            // if the pixel is not the end of same snake from previous frame && the pixel has a value already
-            if(distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
+            // if collision checks enabled && the pixel is not the end of same snake from previous frame && the pixel has a value already
+            if(_Snakes[i].collision.x == 1 && distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
             {
                 // COLLISION
                 _Snakes[i].collision = Arena[id.xy];

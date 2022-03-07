@@ -15,20 +15,20 @@ public class ArenaGPU : MonoBehaviour
 
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
-    ComputeBuffer lineBuffer;
+    //ComputeBuffer lineBuffer;
 
     private void OnEnable()
     {
         snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 13);
-        lineBuffer = new ComputeBuffer(Snake.Snakes.Count * 5, sizeof(float) * 13);
+        //lineBuffer = new ComputeBuffer(Snake.Snakes.Count * 5, sizeof(float) * 13);
     }
 
     private void OnDisable()
     {
         snakeBuffer.Release();
         snakeBuffer = null;
-        lineBuffer.Release();
-        lineBuffer = null;
+        //lineBuffer.Release();
+        //lineBuffer = null;
     }
 
     private IEnumerator Start()
@@ -65,29 +65,29 @@ public class ArenaGPU : MonoBehaviour
     {
         if (Snake.Snakes.Count == 0) return;
 
-        Snake.SnakeDrawData[] snakesData = new Snake.SnakeDrawData[Snake.Snakes.Count];
+        List<Snake.DrawData> snakesDrawData = new List<Snake.DrawData>();
 
-        for (int i = 0; i < Snake.Snakes.Count; i++)
+        foreach (var snake in Snake.Snakes)
         {
-            var snake = Snake.Snakes[i];
             snake.UpdatePosition();
             var data = snake.GetDrawData();
-            snakesData[i] = data;
+            snakesDrawData.AddRange(data);
         }
 
-        DrawSnakes(snakesData);
-        ReadCollisions(ref snakesData);
+        var drawDataArray = snakesDrawData.ToArray();
+        DrawSnakes(drawDataArray);
+        ReadCollisions(ref drawDataArray);
     }
 
-    void DrawSnakes(Snake.SnakeDrawData[] data)
+    void DrawSnakes(Snake.DrawData[] data)
     {
-        // TODO: try to dispatch separately for every segment
         snakeBuffer.SetData(data);
         cs.SetBuffer(0, "_Snakes", snakeBuffer);
+        cs.SetInt("_SnakeCount", data.Length);
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);
     }
 
-    void ReadCollisions(ref Snake.SnakeDrawData[] data)
+    void ReadCollisions(ref Snake.DrawData[] data)
     {
         snakeBuffer.GetData(data);
         foreach (var snake in data)

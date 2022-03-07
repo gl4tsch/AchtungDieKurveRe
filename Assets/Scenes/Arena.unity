@@ -2002,7 +2002,7 @@ MonoBehaviour:
   SnakeTurnRate: 150
   SnakeThickness: 5
   SnakeGapFrequency: 200
-  SnakeGapWidth: 30
+  SnakeGapWidth: 10
 --- !u!1 &1914852776
 GameObject:
   m_ObjectHideFlags: 0
