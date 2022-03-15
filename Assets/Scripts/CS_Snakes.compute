@@ -7,7 +7,14 @@ struct SnakeData
     float2 prevPos, newPos;
     float thickness;
     float4 color;
-    float4 collision;
+    int collision;
+};
+
+struct LineData
+{
+    float2 prevPos, newPos;
+    float thickness;
+    float4 color;
 };
 
 // Create a RenderTexture with enableRandomWrite flag and set it
@@ -15,8 +22,10 @@ struct SnakeData
 RWTexture2D<float4> Arena;
 
 RWStructuredBuffer<SnakeData> _Snakes;
+RWStructuredBuffer<LineData> _Lines;
 int _Width, _Height;
 int _SnakeCount;
+int _LineCount;
 
 float SqrDistToLine( float2 p, float2 a, float2 b )
 {
@@ -43,27 +52,43 @@ float sdArc( float2 p, float2 sc, float ra, float rb )
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    for(int i = 0; i < _SnakeCount; i++)
+    // current pixel in uv space
+    float2 uv = float2((float) id.x / _Width, (float) id.y / _Height);
+
+    // SNAKES
+    for (int i = 0; i < _SnakeCount; i++)
     {
-        float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
-        float distToSegment = sdSegment(uv,_Snakes[i].prevPos,_Snakes[i].newPos);
+        float distToSegment = sdSegment(uv, _Snakes[i].prevPos, _Snakes[i].newPos);
         //float d = sdArc(uv, -0.0001, _Snakes[i].newPos, _Snakes[i].prevPos); // how on earth
 
         // to avoid self-collision
         float distToStart = length(_Snakes[i].prevPos - uv);
 
         // if this pixel is part of the current segment
-        if(distToSegment <= _Snakes[i].thickness)
+        if (distToSegment <= _Snakes[i].thickness)
         {
-            // if collision checks enabled && the pixel is not the end of same snake from previous frame && the pixel has a value already
-            if(_Snakes[i].collision.x == 1 && distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
+            // if the pixel is not the end of same snake from previous frame && the pixel has a value already
+            if (distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
             {
                 // COLLISION
-                _Snakes[i].collision = Arena[id.xy];
+                _Snakes[i].collision = 1;
             }
 
             // fill pixel
             Arena[id.xy] = _Snakes[i].color;
+        }
+    }
+
+    // LINES
+    for (int i = 0; i < _LineCount; i++)
+    {
+        float distToSegment = sdSegment(uv, _Lines[i].prevPos, _Lines[i].newPos);
+
+        // if this pixel is part of the current segment
+        if (distToSegment <= _Snakes[i].thickness)
+        {
+            // fill pixel
+            Arena[id.xy] = _Lines[i].color;
         }
     }
 }

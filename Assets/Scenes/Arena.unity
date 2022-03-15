@@ -1966,7 +1966,7 @@ GameObject:
   m_Layer: 0
   m_Name: Settings
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2800000, guid: 42e0c921b87b0499b90b9348b674cd9b, type: 3}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -2002,7 +2002,7 @@ MonoBehaviour:
   SnakeTurnRate: 150
   SnakeThickness: 5
   SnakeGapFrequency: 200
-  SnakeGapWidth: 10
+  SnakeGapWidth: 30
 --- !u!1 &1914852776
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,20 +15,20 @@ public class ArenaGPU : MonoBehaviour
 
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
-    //ComputeBuffer lineBuffer;
+    ComputeBuffer lineBuffer;
 
     private void OnEnable()
     {
-        snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 13);
-        //lineBuffer = new ComputeBuffer(Snake.Snakes.Count * 5, sizeof(float) * 13);
+        snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 9 + sizeof(int));
+        lineBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 9);
     }
 
     private void OnDisable()
     {
         snakeBuffer.Release();
         snakeBuffer = null;
-        //lineBuffer.Release();
-        //lineBuffer = null;
+        lineBuffer.Release();
+        lineBuffer = null;
     }
 
     private IEnumerator Start()
@@ -65,36 +65,47 @@ public class ArenaGPU : MonoBehaviour
     {
         if (Snake.Snakes.Count == 0) return;
 
-        List<Snake.DrawData> snakesDrawData = new List<Snake.DrawData>();
+        List<Snake.SnakeDrawData> snakesDrawData = new List<Snake.SnakeDrawData>();
+        List<Snake.LineDrawData> lineDrawData = new List<Snake.LineDrawData>();
 
         foreach (var snake in Snake.Snakes)
         {
             snake.UpdatePosition();
-            var data = snake.GetDrawData();
-            snakesDrawData.AddRange(data);
+            var snakeData = snake.GetSnakeDrawData();
+            snakesDrawData.Add(snakeData);
+            var lineData = snake.GetLineDrawData();
+            lineDrawData.AddRange(lineData);
         }
 
-        var drawDataArray = snakesDrawData.ToArray();
-        DrawSnakes(drawDataArray);
-        ReadCollisions(ref drawDataArray);
+        var snakesDrawDataArray = snakesDrawData.ToArray();
+        var lineDrawDataArray = lineDrawData.ToArray();
+
+        Draw(snakesDrawDataArray, lineDrawDataArray); // dispatch compute shader
+
+        ReadCollisions(ref snakesDrawDataArray);
     }
 
-    void DrawSnakes(Snake.DrawData[] data)
+    void Draw(Snake.SnakeDrawData[] snakeData, Snake.LineDrawData[] lineData)
     {
-        snakeBuffer.SetData(data);
+        snakeBuffer.SetData(snakeData);
+        lineBuffer.SetData(lineData);
+
         cs.SetBuffer(0, "_Snakes", snakeBuffer);
-        cs.SetInt("_SnakeCount", data.Length);
+        cs.SetBuffer(0, "_Lines", lineBuffer);
+
+        cs.SetInt("_LineCount", lineData.Length);
+
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);
     }
 
-    void ReadCollisions(ref Snake.DrawData[] data)
+    void ReadCollisions(ref Snake.SnakeDrawData[] data)
     {
         snakeBuffer.GetData(data);
         foreach (var snake in data)
         {
-            if (snake.collision.w > 0)
+            if(snake.collision == 1)
             {
-                Debug.Log(snake.color + " collided with " + snake.collision);
+                Debug.Log(snake.color + " ded!");
                 Snake.Snakes.Remove(GetSnakeByColor((Color)snake.color));
             }
         }

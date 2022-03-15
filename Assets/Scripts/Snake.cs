@@ -23,7 +23,6 @@ public class Snake
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
     Vector2 prevPos;
     float distSinceLastGap = 0;
-    List<DrawData> gapData = new List<DrawData>();
 
     public Snake()
     {
@@ -56,43 +55,49 @@ public class Snake
         Direction = Quaternion.Euler(0, 0, degrees) * Direction;
         Position += Direction * Settings.Instance.SnakeSpeed * Time.deltaTime;
 
-        // Gap
-        if(false)//distSinceLastGap >= Settings.Instance.SnakeGapFrequency)
-        {
-            var gapSegment = new DrawData();
-            gapSegment.oldPos = prevPos;
-            gapSegment.newPos = Position;
-            gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
-            gapSegment.color = new Vector4(0, 0, 0, 0);
-            gapSegment.collision = new Vector4(0, 0, 0, 0); // <- x = 0 to disable collision checks
-            gapData.Add(gapSegment);
-        }
         distSinceLastGap += Vector2.Distance(prevPos, Position);
     }
 
     // returns null if there is nothing to draw
-    public List<DrawData> GetDrawData()
+    public SnakeDrawData GetSnakeDrawData()
     {
         var arenaWidth = Settings.Instance.ArenaWidth;
-        var snakeData = new Snake.DrawData();
+        var snakeData = new SnakeDrawData();
 
-        var prevDataPos = prevPos / arenaWidth;
-        var newDataPos = Position / arenaWidth;
+        var prevUVPos = prevPos / arenaWidth;
+        var newUVPos = Position / arenaWidth;
 
-        snakeData.oldPos = prevDataPos;
-        snakeData.newPos = newDataPos;
+        snakeData.oldUVPos = prevUVPos;
+        snakeData.newUVPos = newUVPos;
         snakeData.thickness = Thickness / Settings.Instance.ArenaWidth;
         snakeData.color = new Vector4(Color.r, Color.g, Color.b, Color.a);
-        snakeData.collision = new Vector4(1, 0, 0, 0); // <- 1 to enable collision checks
+        snakeData.collision = 0;
 
-        List<DrawData> data = new List<DrawData>();
-        data.Add(snakeData);
+        return snakeData;
+    }
 
-        if(distSinceLastGap > Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth)
+    /// <summary>
+    /// gaps and abilities and the like
+    /// </summary>
+    /// <returns></returns>
+    public List<LineDrawData> GetLineDrawData()
+    {
+        var data = new List<LineDrawData>();
+
+        // Gap
+        if (distSinceLastGap >= Settings.Instance.SnakeGapFrequency)
         {
-            // end gap
-            data.AddRange(gapData);
-            gapData.Clear();
+            var arenaWidth = Settings.Instance.ArenaWidth;
+
+            var prevUVPos = (Position - Direction * Settings.Instance.SnakeGapWidth) / arenaWidth;
+            var newUVPos = Position / arenaWidth;
+
+            var gapSegment = new LineDrawData();
+            gapSegment.oldUVPos = prevUVPos;
+            gapSegment.newUVPos = newUVPos;
+            gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
+            gapSegment.color = new Vector4(0, 0, 0, 0);
+            data.Add(gapSegment);
             distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
         }
 
@@ -104,11 +109,18 @@ public class Snake
         Snakes.Remove(this);
     }
 
-    public struct DrawData
+    public struct SnakeDrawData
     {
-        public Vector2 oldPos, newPos;
+        public Vector2 oldUVPos, newUVPos;
         public float thickness;
         public Vector4 color;
-        public Vector4 collision; // before passing to shader: w = 0 => no collision checks w = 1 => do collision checks
+        public int collision; // treated as bool
+    }
+
+    public struct LineDrawData
+    {
+        public Vector2 oldUVPos, newUVPos;
+        public float thickness;
+        public Vector4 color;
     }
 }
