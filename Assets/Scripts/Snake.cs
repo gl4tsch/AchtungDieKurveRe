@@ -9,16 +9,19 @@ public class Snake
     public Vector2 Position { get; private set; }
     public Vector2 Direction { get; private set; }
     public Color Color { get; private set; }
-    public float ThicknessModifier { get; private set; } = 0f;
     public float Thickness => Settings.Instance.SnakeThickness + ThicknessModifier;
-    public float SpeedModifier { get; private set; } = 0f;
-    public float TurnRateModifier { get; private set; } = 0f;
+    public int Score { get; set; } = 0;
+
+    public float ThicknessModifier { get; private set; } = 1f;
+    public float SpeedModifier { get; private set; } = 1f;
+    public float TurnRateModifier { get; private set; } = 1f;
 
     public InputAction LeftAction { get; private set; }
     public InputAction RightAction { get; private set; }
     public InputAction FireAction { get; private set; }
 
     public static List<Snake> Snakes = new List<Snake>(); // this has to go somewhere else at some point
+    public static List<Snake> AliveSnakes = new List<Snake>();
 
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
     Vector2 prevPos;
@@ -28,6 +31,7 @@ public class Snake
     {
         Color = Random.ColorHSV(0,1,0.5f,1,0.5f,1,1,1);
         Snakes.Add(this);
+        Debug.Log(Color + " exists!");
         Name = "Snake " + Snakes.IndexOf(this);
 
         // controls
@@ -46,6 +50,8 @@ public class Snake
         Direction = Random.insideUnitCircle.normalized;
         LeftAction.Enable();
         RightAction.Enable();
+        AliveSnakes.Add(this);
+        Debug.Log(Color + " alive!");
     }
 
     public void UpdatePosition()
@@ -104,9 +110,17 @@ public class Snake
         return data;
     }
 
+    public void Kill()
+    {
+        Score += Snakes.Count - AliveSnakes.Count;
+        AliveSnakes.Remove(this);
+        Debug.Log(Color + " ded!");
+    }
+
     public void Delete()
     {
         Snakes.Remove(this);
+        Debug.Log(Color + " deleted!");
     }
 
     public struct SnakeDrawData

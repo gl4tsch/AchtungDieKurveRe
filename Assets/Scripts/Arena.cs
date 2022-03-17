@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ArenaGPU : MonoBehaviour
+public class Arena : MonoBehaviour
 {
     [SerializeField] ComputeShader cs;
     [SerializeField] RawImage image;
@@ -16,6 +17,8 @@ public class ArenaGPU : MonoBehaviour
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
     ComputeBuffer lineBuffer;
+
+    bool gameRunning = false;
 
     private void OnEnable()
     {
@@ -37,7 +40,7 @@ public class ArenaGPU : MonoBehaviour
 
         yield return new WaitForSeconds(1);
 
-        RandomStartPositions();
+        StartGame();
     }
 
     private void PrepareRenderTex()
@@ -63,12 +66,17 @@ public class ArenaGPU : MonoBehaviour
 
     private void Update()
     {
-        if (Snake.Snakes.Count == 0) return;
+        if (!gameRunning) return;
+
+        if (Snake.AliveSnakes.Count <= 1)
+        {
+            EndGame();
+        }
 
         List<Snake.SnakeDrawData> snakesDrawData = new List<Snake.SnakeDrawData>();
         List<Snake.LineDrawData> lineDrawData = new List<Snake.LineDrawData>();
 
-        foreach (var snake in Snake.Snakes)
+        foreach (var snake in Snake.AliveSnakes)
         {
             snake.UpdatePosition();
             var snakeData = snake.GetSnakeDrawData();
@@ -82,7 +90,7 @@ public class ArenaGPU : MonoBehaviour
 
         Draw(snakesDrawDataArray, lineDrawDataArray); // dispatch compute shader
 
-        ReadCollisions(ref snakesDrawDataArray);
+        ProcessCollisions(ref snakesDrawDataArray);
     }
 
     void Draw(Snake.SnakeDrawData[] snakeData, Snake.LineDrawData[] lineData)
@@ -98,26 +106,40 @@ public class ArenaGPU : MonoBehaviour
         cs.Dispatch(0, pixelWidth / 8, pixelHeight / 8, 1);
     }
 
-    void ReadCollisions(ref Snake.SnakeDrawData[] data)
+    void ProcessCollisions(ref Snake.SnakeDrawData[] data)
     {
         snakeBuffer.GetData(data);
-        foreach (var snake in data)
+        foreach (var snakeData in data)
         {
-            if(snake.collision == 1)
+            if(snakeData.collision == 1)
             {
-                Debug.Log(snake.color + " ded!");
-                Snake.Snakes.Remove(GetSnakeByColor((Color)snake.color));
+                var snake = GetSnakeByColor(snakeData.color);
+                snake.Kill();
             }
         }
     }
 
-    void RandomStartPositions()
+    void StartGame()
     {
         foreach (var snake in Snake.Snakes)
         {
             int travelInASec = (int)Settings.Instance.SnakeSpeed;
             snake.Spawn(pixelWidth, pixelHeight, travelInASec);
         }
+
+        gameRunning = true;
+    }
+
+    private void EndGame()
+    {
+        gameRunning = false;
+
+        for(int i = Snake.AliveSnakes.Count - 1; i >= 0; i--)
+        {
+            Snake.AliveSnakes[i].Kill();
+        }
+
+        StartCoroutine(Start());
     }
 
     Snake GetSnakeByColor(Color col)

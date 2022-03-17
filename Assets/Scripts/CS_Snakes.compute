@@ -22,7 +22,7 @@ struct LineData
 RWTexture2D<float4> Arena;
 
 RWStructuredBuffer<SnakeData> _Snakes;
-RWStructuredBuffer<LineData> _Lines;
+StructuredBuffer<LineData> _Lines;
 int _Width, _Height;
 int _SnakeCount;
 int _LineCount;
@@ -80,7 +80,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     }
 
     // LINES
-    for (int i = 0; i < _LineCount; i++)
+    for (i = 0; i < _LineCount; i++)
     {
         float distToSegment = sdSegment(uv, _Lines[i].prevPos, _Lines[i].newPos);
 
