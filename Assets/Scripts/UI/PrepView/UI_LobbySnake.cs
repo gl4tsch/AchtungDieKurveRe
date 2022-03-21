@@ -5,14 +5,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class UI_Snake : MonoBehaviour
+public class UI_LobbySnake : MonoBehaviour
 {
     [SerializeField] TMP_InputField nameInput;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] TextMeshProUGUI leftButtonText, rightButtonText, fireButtonText;
 
     public Snake Snake { get; private set; }
-    public int SnakeIdx => Snake.Snakes.IndexOf(Snake);
+    public int SnakeIdx => Snake.AllSnakes.IndexOf(Snake);
 
     public void Init(Snake snake)
     {

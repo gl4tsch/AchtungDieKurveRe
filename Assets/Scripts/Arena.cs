@@ -22,8 +22,8 @@ public class Arena : MonoBehaviour
 
     private void OnEnable()
     {
-        snakeBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 9 + sizeof(int));
-        lineBuffer = new ComputeBuffer(Snake.Snakes.Count, sizeof(float) * 9);
+        snakeBuffer = new ComputeBuffer(Snake.AllSnakes.Count, sizeof(float) * 9 + sizeof(int));
+        lineBuffer = new ComputeBuffer(Snake.AllSnakes.Count, sizeof(float) * 9);
     }
 
     private void OnDisable()
@@ -58,7 +58,7 @@ public class Arena : MonoBehaviour
         cs.SetTexture(1, "Arena", renderTex);
         cs.SetInt("_Width", pixelWidth);
         cs.SetInt("_Height", pixelHeight);
-        cs.SetInt("_SnakeCount", Snake.Snakes.Count);
+        cs.SetInt("_SnakeCount", Snake.AllSnakes.Count);
 
         // fill arena border
         cs.Dispatch(1, pixelWidth / 8, pixelHeight / 8, 1);
@@ -70,7 +70,8 @@ public class Arena : MonoBehaviour
 
         if (Snake.AliveSnakes.Count <= 1)
         {
-            EndGame();
+            EndRound();
+            return;
         }
 
         List<Snake.SnakeDrawData> snakesDrawData = new List<Snake.SnakeDrawData>();
@@ -121,7 +122,7 @@ public class Arena : MonoBehaviour
 
     void StartGame()
     {
-        foreach (var snake in Snake.Snakes)
+        foreach (var snake in Snake.AllSnakes)
         {
             int travelInASec = (int)Settings.Instance.SnakeSpeed;
             snake.Spawn(pixelWidth, pixelHeight, travelInASec);
@@ -130,7 +131,7 @@ public class Arena : MonoBehaviour
         gameRunning = true;
     }
 
-    private void EndGame()
+    private void EndRound()
     {
         gameRunning = false;
 
@@ -144,6 +145,6 @@ public class Arena : MonoBehaviour
 
     Snake GetSnakeByColor(Color col)
     {
-        return Snake.Snakes.Find(s => s.Color.Equals(col));
+        return Snake.AllSnakes.Find(s => s.Color.Equals(col));
     }
 }

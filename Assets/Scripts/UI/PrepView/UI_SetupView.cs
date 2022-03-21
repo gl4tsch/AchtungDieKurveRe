@@ -3,19 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_Settings : MonoBehaviour
+public class UI_SetupView : UI_View
 {
-    [SerializeField] UI_Snake UISnakePrefab;
+    [SerializeField] UI_LobbySnake UISnakePrefab;
     [SerializeField] RectTransform SnakesContainer;
     [SerializeField] RectTransform AddSnakeButton;
 
-    List<UI_Snake> uiSnakes = new List<UI_Snake>();
+    List<UI_LobbySnake> uiSnakes = new List<UI_LobbySnake>();
 
     public void AddSnake()
     {
-        UI_Snake uiSnake = Instantiate(UISnakePrefab, SnakesContainer);
+        UI_LobbySnake uiSnake = Instantiate(UISnakePrefab, SnakesContainer);
         uiSnakes.Add(uiSnake);
         AddSnakeButton.SetAsLastSibling();
         uiSnake.Init(new Snake());
+    }
+
+    public void OnPlayButton()
+    {
+        GameStateMachine.Instance.ChangeState(new ArenaState());
     }
 }

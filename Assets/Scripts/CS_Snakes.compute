@@ -12,7 +12,7 @@ struct SnakeData
 
 struct LineData
 {
-    float2 prevPos, newPos;
+    float2 posA, posB;
     float thickness;
     float4 color;
 };
@@ -82,7 +82,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     // LINES
     for (i = 0; i < _LineCount; i++)
     {
-        float distToSegment = sdSegment(uv, _Lines[i].prevPos, _Lines[i].newPos);
+        float distToSegment = sdSegment(uv, _Lines[i].posA, _Lines[i].posB);
 
         // if this pixel is part of the current segment
         if (distToSegment <= _Snakes[i].thickness)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class Snake
     public Vector2 Direction { get; private set; }
     public Color Color { get; private set; }
     public float Thickness => Settings.Instance.SnakeThickness + ThicknessModifier;
-    public int Score { get; set; } = 0;
+    public int Score { get; private set; } = 0;
 
     public float ThicknessModifier { get; private set; } = 1f;
     public float SpeedModifier { get; private set; } = 1f;
@@ -20,7 +21,10 @@ public class Snake
     public InputAction RightAction { get; private set; }
     public InputAction FireAction { get; private set; }
 
-    public static List<Snake> Snakes = new List<Snake>(); // this has to go somewhere else at some point
+    // Events
+    public event Action<int> OnScoreChanged;
+
+    public static List<Snake> AllSnakes = new List<Snake>(); // this has to go somewhere else at some point
     public static List<Snake> AliveSnakes = new List<Snake>();
 
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
@@ -29,10 +33,10 @@ public class Snake
 
     public Snake()
     {
-        Color = Random.ColorHSV(0,1,0.5f,1,0.5f,1,1,1);
-        Snakes.Add(this);
+        Color = UnityEngine.Random.ColorHSV(0,1,0.5f,1,0.5f,1,1,1);
+        AllSnakes.Add(this);
         Debug.Log(Color + " exists!");
-        Name = "Snake " + Snakes.IndexOf(this);
+        Name = "Snake " + AllSnakes.IndexOf(this);
 
         // controls
         LeftAction = new InputAction("left", binding: "<Keyboard>/a");
@@ -46,8 +50,8 @@ public class Snake
 
     public void Spawn(int arenaPixelWidth, int arenaPixelHeight, int borderWidth)
     {
-        Position = new Vector2(Random.Range(0 + borderWidth, arenaPixelWidth - borderWidth), Random.Range(0 + borderWidth, arenaPixelHeight - borderWidth));
-        Direction = Random.insideUnitCircle.normalized;
+        Position = new Vector2(UnityEngine.Random.Range(0 + borderWidth, arenaPixelWidth - borderWidth), UnityEngine.Random.Range(0 + borderWidth, arenaPixelHeight - borderWidth));
+        Direction = UnityEngine.Random.insideUnitCircle.normalized;
         LeftAction.Enable();
         RightAction.Enable();
         AliveSnakes.Add(this);
@@ -99,8 +103,8 @@ public class Snake
             var newUVPos = Position / arenaWidth;
 
             var gapSegment = new LineDrawData();
-            gapSegment.oldUVPos = prevUVPos;
-            gapSegment.newUVPos = newUVPos;
+            gapSegment.UVPosA = prevUVPos;
+            gapSegment.UVPosB = newUVPos;
             gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
             gapSegment.color = new Vector4(0, 0, 0, 0);
             data.Add(gapSegment);
@@ -112,14 +116,15 @@ public class Snake
 
     public void Kill()
     {
-        Score += Snakes.Count - AliveSnakes.Count;
+        Score += AllSnakes.Count - AliveSnakes.Count;
+        OnScoreChanged?.Invoke(Score);
         AliveSnakes.Remove(this);
         Debug.Log(Color + " ded!");
     }
 
     public void Delete()
     {
-        Snakes.Remove(this);
+        AllSnakes.Remove(this);
         Debug.Log(Color + " deleted!");
     }
 
@@ -133,7 +138,7 @@ public class Snake
 
     public struct LineDrawData
     {
-        public Vector2 oldUVPos, newUVPos;
+        public Vector2 UVPosA, UVPosB;
         public float thickness;
         public Vector4 color;
     }
