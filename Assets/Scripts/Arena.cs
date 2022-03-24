@@ -20,10 +20,13 @@ public class Arena : MonoBehaviour
 
     bool gameRunning = false;
 
+    Queue<Snake.LineDrawData> lineDrawDataBuffer = new Queue<Snake.LineDrawData>();
+    int maxAdditionalLinesDrawnEachFramePerSnake = 3;
+
     private void OnEnable()
     {
         snakeBuffer = new ComputeBuffer(Snake.AllSnakes.Count, sizeof(float) * 9 + sizeof(int));
-        lineBuffer = new ComputeBuffer(Snake.AllSnakes.Count, sizeof(float) * 9);
+        lineBuffer = new ComputeBuffer(Snake.AllSnakes.Count * maxAdditionalLinesDrawnEachFramePerSnake, sizeof(float) * 9);
     }
 
     private void OnDisable()
@@ -79,11 +82,24 @@ public class Arena : MonoBehaviour
 
         foreach (var snake in Snake.AliveSnakes)
         {
-            snake.UpdatePosition();
+            snake.Update();
             var snakeData = snake.GetSnakeDrawData();
             snakesDrawData.Add(snakeData);
+
+            // fill line buffer
             var lineData = snake.GetLineDrawData();
-            lineDrawData.AddRange(lineData);
+            foreach(var ld in lineData)
+            {
+                lineDrawDataBuffer.Enqueue(ld);
+            }
+
+            // drain line buffer
+            for (int i = 0; i < maxAdditionalLinesDrawnEachFramePerSnake; i++)
+            {
+                if (lineDrawDataBuffer.Count <= 0) break;
+
+                lineDrawData.Add(lineDrawDataBuffer.Dequeue());
+            }
         }
 
         var snakesDrawDataArray = snakesDrawData.ToArray();

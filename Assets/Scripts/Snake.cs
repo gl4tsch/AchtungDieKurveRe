@@ -29,6 +29,9 @@ public class Snake
 
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
     Vector2 prevPos;
+
+    // Gap
+    Stack<LineDrawData> gapBuffer = new Stack<LineDrawData>();
     float distSinceLastGap = 0;
 
     public Snake()
@@ -58,14 +61,63 @@ public class Snake
         Debug.Log(Color + " alive!");
     }
 
-    public void UpdatePosition()
+    public void Update()
+    {
+        UpdatePosition();
+        UpdateGap();
+    }
+
+    void UpdatePosition()
     {
         prevPos = Position;
         float degrees = Settings.Instance.SnakeTurnRate * turnSign * Time.deltaTime;
         Direction = Quaternion.Euler(0, 0, degrees) * Direction;
         Position += Direction * Settings.Instance.SnakeSpeed * Time.deltaTime;
+    }
 
+    void UpdateGap()
+    {
         distSinceLastGap += Vector2.Distance(prevPos, Position);
+
+        if(distSinceLastGap > Settings.Instance.SnakeGapFrequency)
+        {
+            // add to gap buffer
+            var arenaWidth = Settings.Instance.ArenaWidth;
+
+            var prevUVPos = prevPos / arenaWidth; //(Position - Direction * Settings.Instance.SnakeGapWidth) / arenaWidth;
+            var newUVPos = Position / arenaWidth;
+
+            var gapSegment = new LineDrawData();
+            gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
+            gapSegment.color = new Vector4(0, 0, 0, 0);
+
+            // check if data can be combined
+            // TODO: unspaghetti
+            if(gapBuffer.Count > 0)
+            {
+                var lastSegment = gapBuffer.Peek();
+
+                if (Vector2.Angle(lastSegment.UVPosB - lastSegment.UVPosA, prevUVPos - newUVPos) < 0.01)
+                {
+                    gapBuffer.Pop();
+
+                    gapSegment.UVPosA = lastSegment.UVPosA;
+                    gapSegment.UVPosB = newUVPos;
+                }
+                else
+                {
+                    gapSegment.UVPosA = prevUVPos;
+                    gapSegment.UVPosB = newUVPos;
+                }
+            }
+            else
+            {
+                gapSegment.UVPosA = prevUVPos;
+                gapSegment.UVPosB = newUVPos;
+            }
+
+            gapBuffer.Push(gapSegment);
+        }
     }
 
     // returns null if there is nothing to draw
@@ -94,20 +146,11 @@ public class Snake
     {
         var data = new List<LineDrawData>();
 
-        // Gap
-        if (distSinceLastGap >= Settings.Instance.SnakeGapFrequency)
+        // Gap end
+        if(distSinceLastGap > Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth)
         {
-            var arenaWidth = Settings.Instance.ArenaWidth;
-
-            var prevUVPos = (Position - Direction * Settings.Instance.SnakeGapWidth) / arenaWidth;
-            var newUVPos = Position / arenaWidth;
-
-            var gapSegment = new LineDrawData();
-            gapSegment.UVPosA = prevUVPos;
-            gapSegment.UVPosB = newUVPos;
-            gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
-            gapSegment.color = new Vector4(0, 0, 0, 0);
-            data.Add(gapSegment);
+            data.AddRange(gapBuffer);
+            gapBuffer.Clear();
             distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
         }
 
