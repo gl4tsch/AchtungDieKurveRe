@@ -12,8 +12,6 @@ public class Arena : MonoBehaviour
     int pixelWidth => Settings.Instance.ArenaWidth;
     int pixelHeight => Settings.Instance.ArenaHeight;
 
-    public event System.Action<Snake, Snake> CollisionEvent;
-
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
     ComputeBuffer lineBuffer;

@@ -13,6 +13,8 @@ public class Snake
     public float Thickness => Settings.Instance.SnakeThickness + ThicknessModifier;
     public int Score { get; private set; } = 0;
 
+    public BaseAbility Ability;
+
     public float ThicknessModifier { get; private set; } = 1f;
     public float SpeedModifier { get; private set; } = 1f;
     public float TurnRateModifier { get; private set; } = 1f;
@@ -31,8 +33,10 @@ public class Snake
     Vector2 prevPos;
 
     // Gap
-    Stack<LineDrawData> gapBuffer = new Stack<LineDrawData>();
+    Stack<LineDrawData> gapDrawBuffer = new Stack<LineDrawData>();
     float distSinceLastGap = 0;
+
+    List<LineDrawData> injectionDrawBuffer = new List<LineDrawData>();
 
     public Snake()
     {
@@ -40,6 +44,7 @@ public class Snake
         AllSnakes.Add(this);
         Debug.Log(Color + " exists!");
         Name = "Snake " + AllSnakes.IndexOf(this);
+        Ability = new EraserAbility(this);
 
         // controls
         LeftAction = new InputAction("left", binding: "<Keyboard>/a");
@@ -49,6 +54,7 @@ public class Snake
         RightAction.started += c => turnSign--;
         RightAction.canceled += c => turnSign++;
         FireAction = new InputAction("fire", binding: "<Keyboard>/s");
+        FireAction.started += c => Ability.Activate();
     }
 
     public void Spawn(int arenaPixelWidth, int arenaPixelHeight, int borderWidth)
@@ -57,6 +63,7 @@ public class Snake
         Direction = UnityEngine.Random.insideUnitCircle.normalized;
         LeftAction.Enable();
         RightAction.Enable();
+        FireAction.Enable();
         AliveSnakes.Add(this);
         Debug.Log(Color + " alive!");
     }
@@ -93,13 +100,13 @@ public class Snake
 
             // check if data can be combined
             // TODO: unspaghetti
-            if(gapBuffer.Count > 0)
+            if(gapDrawBuffer.Count > 0)
             {
-                var lastSegment = gapBuffer.Peek();
+                var lastSegment = gapDrawBuffer.Peek();
 
                 if (Vector2.Angle(lastSegment.UVPosB - lastSegment.UVPosA, prevUVPos - newUVPos) < 0.01)
                 {
-                    gapBuffer.Pop();
+                    gapDrawBuffer.Pop();
 
                     gapSegment.UVPosA = lastSegment.UVPosA;
                     gapSegment.UVPosB = newUVPos;
@@ -116,11 +123,10 @@ public class Snake
                 gapSegment.UVPosB = newUVPos;
             }
 
-            gapBuffer.Push(gapSegment);
+            gapDrawBuffer.Push(gapSegment);
         }
     }
 
-    // returns null if there is nothing to draw
     public SnakeDrawData GetSnakeDrawData()
     {
         var arenaWidth = Settings.Instance.ArenaWidth;
@@ -141,20 +147,29 @@ public class Snake
     /// <summary>
     /// gaps and abilities and the like
     /// </summary>
-    /// <returns></returns>
+    /// <returns>draw data no collision checks should be done with</returns>
     public List<LineDrawData> GetLineDrawData()
     {
         var data = new List<LineDrawData>();
 
+        // injected draw data from e.g. abilities
+        data.AddRange(injectionDrawBuffer);
+        injectionDrawBuffer.Clear();
+
         // Gap end
         if(distSinceLastGap > Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth)
         {
-            data.AddRange(gapBuffer);
-            gapBuffer.Clear();
+            data.AddRange(gapDrawBuffer);
+            gapDrawBuffer.Clear();
             distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
         }
 
         return data;
+    }
+
+    public void InjectLineDrawData(List<LineDrawData> lineDrawData)
+    {
+        injectionDrawBuffer.AddRange(lineDrawData);
     }
 
     public void Kill()
@@ -171,6 +186,9 @@ public class Snake
         Debug.Log(Color + " deleted!");
     }
 
+    /// <summary>
+    /// has collision
+    /// </summary>
     public struct SnakeDrawData
     {
         public Vector2 oldUVPos, newUVPos;
@@ -179,6 +197,9 @@ public class Snake
         public int collision; // treated as bool
     }
 
+    /// <summary>
+    /// no collision
+    /// </summary>
     public struct LineDrawData
     {
         public Vector2 UVPosA, UVPosB;
