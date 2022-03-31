@@ -10,7 +10,7 @@ public class EraserAbility : BaseAbility
 
     protected override void Perform()
     {
-        var arenaWidth = Settings.Instance.ArenaWidth;
+        var arenaWidth = Settings.Instance.ArenaWidth.Value;
         var erase = new Snake.LineDrawData();
         erase.UVPosA = mySnake.Position / arenaWidth;
         erase.UVPosB = erase.UVPosA + mySnake.Direction.normalized * ((float)erasePixelLength / (float)arenaWidth);

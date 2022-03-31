@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SO_Primitive<T> : SO_Base
+public class SO_EventVar<T> : SO_Base
 {
     public T Value => value;
     private T value;
@@ -13,7 +13,7 @@ public class SO_Primitive<T> : SO_Base
     public Action<T> OnValueChanged;
     public Action<T, T> OnValueChangedFromTo;
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         SetValue(initialValue);
     }

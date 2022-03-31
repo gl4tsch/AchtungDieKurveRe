@@ -12,7 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(TextMeshProUGUI))]
 public class TMP_Text_SO_Companion : MonoBehaviour
 {
-    [SerializeField] SO_Primitive<string> valueSO;
+    [SerializeField] SO_EventVar<string> valueSO;
 
     TextMeshProUGUI text => GetComponent<TextMeshProUGUI>();
 

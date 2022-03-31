@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "ScriptableObjects/ParsedPrimitives/FloatAsString")]
-public class SO_FloatAsString : SO_ParsedPrimitive<float, string>
+public class SO_FloatAsString : SO_ParsedEventVar<float, string>
 {
     protected override string Parse(float primitive)
     {

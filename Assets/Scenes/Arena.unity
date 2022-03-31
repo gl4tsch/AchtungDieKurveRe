@@ -2014,7 +2014,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73ee6067015b79f42b43adc11e0a6868, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ArenaWidth: 1024
+  ArenaWidth: {fileID: 11400000, guid: 9f22a561add57e3439c83fc60d5c64d1, type: 2}
   ArenaHeight: 1024
   SnakeSpeed: 100
   SnakeTurnRate: 150

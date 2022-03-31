@@ -89,13 +89,13 @@ public class Snake
         if(distSinceLastGap > Settings.Instance.SnakeGapFrequency)
         {
             // add to gap buffer
-            var arenaWidth = Settings.Instance.ArenaWidth;
+            var arenaWidth = Settings.Instance.ArenaWidth.Value;
 
             var prevUVPos = prevPos / arenaWidth; //(Position - Direction * Settings.Instance.SnakeGapWidth) / arenaWidth;
             var newUVPos = Position / arenaWidth;
 
             var gapSegment = new LineDrawData();
-            gapSegment.thickness = Thickness / Settings.Instance.ArenaWidth;
+            gapSegment.thickness = Thickness / arenaWidth;
             gapSegment.color = new Vector4(0, 0, 0, 0);
 
             // check if data can be combined
@@ -129,7 +129,7 @@ public class Snake
 
     public SnakeDrawData GetSnakeDrawData()
     {
-        var arenaWidth = Settings.Instance.ArenaWidth;
+        var arenaWidth = Settings.Instance.ArenaWidth.Value;
         var snakeData = new SnakeDrawData();
 
         var prevUVPos = prevPos / arenaWidth;
@@ -137,7 +137,7 @@ public class Snake
 
         snakeData.oldUVPos = prevUVPos;
         snakeData.newUVPos = newUVPos;
-        snakeData.thickness = Thickness / Settings.Instance.ArenaWidth;
+        snakeData.thickness = Thickness / arenaWidth;
         snakeData.color = new Vector4(Color.r, Color.g, Color.b, Color.a);
         snakeData.collision = 0;
 

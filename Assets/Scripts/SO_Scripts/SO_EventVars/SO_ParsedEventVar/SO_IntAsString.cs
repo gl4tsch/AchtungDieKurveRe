@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "ScriptableObjects/ParsedPrimitives/IntAsString")]
-public class SO_IntAsString : SO_ParsedPrimitive<int, string>
+public class SO_IntAsString : SO_ParsedEventVar<int, string>
 {
     protected override string Parse(int primitive)
     {

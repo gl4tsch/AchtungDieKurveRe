@@ -9,7 +9,7 @@ public class Arena : MonoBehaviour
     [SerializeField] ComputeShader cs;
     [SerializeField] RawImage image;
 
-    int pixelWidth => Settings.Instance.ArenaWidth;
+    int pixelWidth => Settings.Instance.ArenaWidth.Value;
     int pixelHeight => Settings.Instance.ArenaHeight;
 
     RenderTexture renderTex;

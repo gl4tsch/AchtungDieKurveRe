@@ -7,7 +7,7 @@ public class Settings : MonoBehaviour
     public static Settings Instance { get; private set; }
 
     [Header("Arena")]
-    public int ArenaWidth = 1024;
+    public SO_PlayerPrefsInt ArenaWidth;
     public int ArenaHeight = 1024;
 
     [Header("Snake")]
@@ -19,6 +19,7 @@ public class Settings : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton
         if(Instance != null)
         {
             Destroy(this);
@@ -26,5 +27,11 @@ public class Settings : MonoBehaviour
         }
 
         Instance = this;
+        DontDestroyOnLoad(this);
+    }
+
+    private void OnDestroy()
+    {
+        PlayerPrefs.Save();
     }
 }
