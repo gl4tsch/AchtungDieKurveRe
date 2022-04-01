@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_SetupView : UI_View
+public class UI_PrepView : UI_View
 {
     [SerializeField] UI_LobbySnake UISnakePrefab;
     [SerializeField] RectTransform SnakesContainer;

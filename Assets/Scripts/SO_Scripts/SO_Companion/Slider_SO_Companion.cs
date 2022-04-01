@@ -6,7 +6,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Slider))]
 public class Slider_SO_Companion : MonoBehaviour
 {
-    [SerializeField] SO_Float valueSO;
+    [SerializeField] SO_EventVar<float> valueSO;
 
     Slider slider => GetComponent<Slider>();
 

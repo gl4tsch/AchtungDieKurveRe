@@ -7,6 +7,6 @@ public class SetupState : GameStateMachine.BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        Owner.ViewManager.ChangeView(typeof(UI_SetupView));
+        Owner.ViewManager.ChangeView(typeof(UI_PrepView));
     }
 }

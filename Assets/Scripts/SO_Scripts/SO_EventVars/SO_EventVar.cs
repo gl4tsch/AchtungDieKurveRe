@@ -30,4 +30,14 @@ public class SO_EventVar<T> : SO_Base
     {
         value = _value;
     }
+
+    public virtual void ResetValue()
+    {
+        SetValue(initialValue);
+    }
+
+    public virtual void ResetValueWithoutNotify()
+    {
+        SetValueWithoutNotify(initialValue);
+    }
 }
