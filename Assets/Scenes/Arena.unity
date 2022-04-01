@@ -2015,12 +2015,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ArenaWidth: {fileID: 11400000, guid: 9f22a561add57e3439c83fc60d5c64d1, type: 2}
-  ArenaHeight: 1024
-  SnakeSpeed: 100
-  SnakeTurnRate: 150
-  SnakeThickness: 5
-  SnakeGapFrequency: 600
-  SnakeGapWidth: 30
+  ArenaHeight: {fileID: 11400000, guid: 9f22a561add57e3439c83fc60d5c64d1, type: 2}
+  SnakeSpeed: {fileID: 11400000, guid: 579878efa1da5fc47b626ebeb604c184, type: 2}
+  SnakeTurnRate: {fileID: 11400000, guid: bf775ec8f7006364a9af6bbc33647dab, type: 2}
+  SnakeThickness: {fileID: 11400000, guid: a0a27cbd469e407408613fdb14e0afe5, type: 2}
+  SnakeGapFrequency: {fileID: 11400000, guid: ca7b0583023967d45bfd322aac7348fc, type: 2}
+  SnakeGapWidth: {fileID: 11400000, guid: ee65f41102add1545b76e94b47d34837, type: 2}
 --- !u!1 &1914852776
 GameObject:
   m_ObjectHideFlags: 0

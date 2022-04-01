@@ -65,10 +65,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         float distToStart = length(_Snakes[i].prevPos - uv);
 
         // if this pixel is part of the current segment
-        if (distToSegment <= _Snakes[i].thickness)
+        if (distToSegment <= _Snakes[i].thickness / 2)
         {
             // if the pixel is not the end of same snake from previous frame && the pixel has a value already
-            if (distToStart > _Snakes[i].thickness && Arena[id.xy].a > 0)
+            if (distToStart > _Snakes[i].thickness / 2 && Arena[id.xy].a > 0)
             {
                 // COLLISION
                 _Snakes[i].collision = 1;
@@ -85,7 +85,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         float distToSegment = sdSegment(uv, _Lines[i].posA, _Lines[i].posB);
 
         // if this pixel is part of the current segment
-        if (distToSegment <= _Snakes[i].thickness)
+        if (distToSegment <= _Snakes[i].thickness / 2)
         {
             // fill pixel
             Arena[id.xy] = _Lines[i].color;

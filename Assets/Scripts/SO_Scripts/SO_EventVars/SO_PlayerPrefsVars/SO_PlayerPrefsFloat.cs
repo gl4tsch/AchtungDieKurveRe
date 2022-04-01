@@ -15,6 +15,7 @@ public class SO_PlayerPrefsFloat : SO_EventVar<float>
     public void LoadFromPlayerPrefs()
     {
         base.SetValue(PlayerPrefs.GetFloat(playerPrefsKey, initialValue));
+        Debug.Log("loading " + playerPrefsKey + " from PlayerPrefs: " + Value);
     }
 
     public override void SetValue(float _value)

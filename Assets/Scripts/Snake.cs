@@ -7,10 +7,16 @@ using UnityEngine.InputSystem;
 public class Snake
 {
     public string Name;
-    public Vector2 Position { get; private set; }
+    public Vector2 Position { get; private set; } // in pixel
     public Vector2 Direction { get; private set; }
     public Color Color { get; private set; }
-    public float Thickness => Settings.Instance.SnakeThickness + ThicknessModifier;
+
+    public float Speed => Settings.Instance.SnakePixelSpeed * SpeedModifier;
+    public float TurnRate => Settings.Instance.SnakeTurnRate.Value;
+    public float Thickness => Settings.Instance.SnakePixelThickness * ThicknessModifier;
+    public float GapFrequency => Settings.Instance.SnakePixelGapFrequency * Settings.Instance.ArenaWidth.Value;
+    public float GapWidth => Settings.Instance.SnakePixelGapWidth * Thickness;
+
     public int Score { get; private set; } = 0;
 
     public BaseAbility Ability;
@@ -77,16 +83,16 @@ public class Snake
     void UpdatePosition()
     {
         prevPos = Position;
-        float degrees = Settings.Instance.SnakeTurnRate * turnSign * Time.deltaTime;
+        float degrees = TurnRate * turnSign * Time.deltaTime;
         Direction = Quaternion.Euler(0, 0, degrees) * Direction;
-        Position += Direction * Settings.Instance.SnakeSpeed * Time.deltaTime;
+        Position += Direction * Speed * Time.deltaTime;
     }
 
     void UpdateGap()
     {
         distSinceLastGap += Vector2.Distance(prevPos, Position);
 
-        if(distSinceLastGap > Settings.Instance.SnakeGapFrequency)
+        if(distSinceLastGap > GapFrequency)
         {
             // add to gap buffer
             var arenaWidth = Settings.Instance.ArenaWidth.Value;
@@ -157,11 +163,11 @@ public class Snake
         injectionDrawBuffer.Clear();
 
         // Gap end
-        if(distSinceLastGap > Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth)
+        if(distSinceLastGap > GapFrequency + GapWidth)
         {
             data.AddRange(gapDrawBuffer);
             gapDrawBuffer.Clear();
-            distSinceLastGap -= Settings.Instance.SnakeGapFrequency + Settings.Instance.SnakeGapWidth;
+            distSinceLastGap -= GapFrequency + GapWidth;
         }
 
         return data;

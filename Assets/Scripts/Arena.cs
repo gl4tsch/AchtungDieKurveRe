@@ -10,7 +10,7 @@ public class Arena : MonoBehaviour
     [SerializeField] RawImage image;
 
     int pixelWidth => Settings.Instance.ArenaWidth.Value;
-    int pixelHeight => Settings.Instance.ArenaHeight;
+    int pixelHeight => Settings.Instance.ArenaHeight.Value;
 
     RenderTexture renderTex;
     ComputeBuffer snakeBuffer;
@@ -138,7 +138,7 @@ public class Arena : MonoBehaviour
     {
         foreach (var snake in Snake.AllSnakes)
         {
-            int travelInASec = (int)Settings.Instance.SnakeSpeed;
+            int travelInASec = (int)Settings.Instance.SnakeSpeed.Value;
             snake.Spawn(pixelWidth, pixelHeight, travelInASec);
         }
 
