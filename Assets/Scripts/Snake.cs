@@ -12,10 +12,10 @@ public class Snake
     public Color Color { get; private set; }
 
     public float Speed => Settings.Instance.SnakePixelSpeed * SpeedModifier;
-    public float TurnRate => Settings.Instance.SnakeTurnRate.Value;
+    public float TurnRate => Settings.Instance.SnakeTurnRate.Value * TurnRateModifier;
     public float Thickness => Settings.Instance.SnakePixelThickness * ThicknessModifier;
-    public float GapFrequency => Settings.Instance.SnakePixelGapFrequency * Settings.Instance.ArenaWidth.Value;
-    public float GapWidth => Settings.Instance.SnakePixelGapWidth * Thickness;
+    public float GapFrequency => Settings.Instance.SnakePixelGapFrequency;
+    public float GapWidth => Settings.Instance.SnakePixelGapWidth;
 
     public int Score { get; private set; } = 0;
 
