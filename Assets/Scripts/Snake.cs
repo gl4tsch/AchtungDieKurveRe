@@ -100,7 +100,7 @@ public class Snake
             var newUVPos = Position / arenaWidth;
 
             var gapSegment = new LineDrawData();
-            gapSegment.thickness = Thickness / arenaWidth + 0.0001f;
+            gapSegment.thickness = (Thickness + 4f) / arenaWidth;
             gapSegment.color = new Vector4(0, 0, 0, 0);
 
             // check if data can be combined
