@@ -14,7 +14,13 @@ public class UI_StatsStack : MonoBehaviour
 
     void OnEnable()
     {
+        SnakeScore.OnScoresResorted += SortStack;
         BuildStatsStack();
+    }
+
+    void OnDisable()
+    {
+        SnakeScore.OnScoresResorted -= SortStack;
     }
 
     void BuildStatsStack()
@@ -27,7 +33,7 @@ public class UI_StatsStack : MonoBehaviour
         }
 
         // build new stack
-        foreach(Snake snake in Snake.AllSnakes)
+        foreach(var snake in Snake.AllSnakes)
         {
             UI_SnakeStats snakeStatsInstance = Instantiate(statsPrefab, snakeStatsContainer);
             snakeStatsInstance.Init(snake);
@@ -35,16 +41,15 @@ public class UI_StatsStack : MonoBehaviour
         }
 
         // sort
-        SortStats();
+        SortStack();
     }
 
-    public void SortStats()
+    public void SortStack()
     {
-        statsStack.Sort((a, b) => b.Score.CompareTo(a.Score));
-
         foreach(var stat in statsStack)
         {
-            stat.transform.SetSiblingIndex(statsStack.IndexOf(stat));
+            int idx = SnakeScore.SortedScores.IndexOf(stat.Score);
+            stat.transform.SetSiblingIndex(idx);
         }
     }
 }

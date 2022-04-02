@@ -7,8 +7,9 @@ using UnityEngine;
 public class UI_SnakeStats : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI pointsLabel;
+    [SerializeField] TextMeshProUGUI abilityUses;
 
-    public int Score => mySnake.Score;
+    public SnakeScore Score => mySnake.Score;
 
     Snake mySnake;
 
@@ -16,21 +17,34 @@ public class UI_SnakeStats : MonoBehaviour
     {
         mySnake = snake;
         pointsLabel.color = mySnake.Color;
-        mySnake.OnScoreChanged += UpdateScore;
-        UpdateScore(mySnake.Score);
+        abilityUses.color = mySnake.Color;
+
+        Score.OnScoreChanged += UpdateScore;
+        mySnake.Ability.OnUsesChanged += UpdateUses;
+
+        UpdateScore(Score);
+        UpdateUses(mySnake.Ability.Uses);
     }
 
     private void OnDisable()
     {
-        if(mySnake != null)
+        if(Score != null)
         {
-            mySnake.OnScoreChanged -= UpdateScore;
+            Score.OnScoreChanged -= UpdateScore;
+        }
+        if(mySnake != null && mySnake.Ability != null)
+        {
+            mySnake.Ability.OnUsesChanged -= UpdateUses;
         }
     }
 
-    private void UpdateScore(int score)
+    private void UpdateScore(SnakeScore score)
     {
-        pointsLabel.text = score.ToString();
-        GetComponentInParent<UI_StatsStack>().SortStats();
+        pointsLabel.text = score.Score.ToString();
+    }
+
+    void UpdateUses(int uses)
+    {
+        abilityUses.text = uses.ToString();
     }
 }

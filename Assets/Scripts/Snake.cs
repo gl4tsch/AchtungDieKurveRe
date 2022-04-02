@@ -17,8 +17,7 @@ public class Snake
     public float GapFrequency => Settings.Instance.SnakePixelGapFrequency;
     public float GapWidth => Settings.Instance.SnakePixelGapWidth;
 
-    public int Score { get; private set; } = 0;
-
+    public SnakeScore Score;
     public BaseAbility Ability;
 
     public float ThicknessModifier { get; private set; } = 1f;
@@ -28,9 +27,6 @@ public class Snake
     public InputAction LeftAction { get; private set; }
     public InputAction RightAction { get; private set; }
     public InputAction FireAction { get; private set; }
-
-    // Events
-    public event Action<int> OnScoreChanged;
 
     public static List<Snake> AllSnakes = new List<Snake>(); // this has to go somewhere else at some point
     public static List<Snake> AliveSnakes = new List<Snake>();
@@ -51,6 +47,7 @@ public class Snake
         Debug.Log(Color + " exists!");
         Name = "Snake " + AllSnakes.IndexOf(this);
         Ability = new EraserAbility(this);
+        Score = new SnakeScore();
 
         // controls
         LeftAction = new InputAction("left", binding: "<Keyboard>/a");
@@ -67,6 +64,8 @@ public class Snake
     {
         Position = new Vector2(UnityEngine.Random.Range(0 + borderWidth, arenaPixelWidth - borderWidth), UnityEngine.Random.Range(0 + borderWidth, arenaPixelHeight - borderWidth));
         Direction = UnityEngine.Random.insideUnitCircle.normalized;
+        Ability.SetUses(Score.Place);
+
         LeftAction.Enable();
         RightAction.Enable();
         FireAction.Enable();
@@ -101,7 +100,7 @@ public class Snake
             var newUVPos = Position / arenaWidth;
 
             var gapSegment = new LineDrawData();
-            gapSegment.thickness = Thickness / arenaWidth;
+            gapSegment.thickness = Thickness / arenaWidth + 0.0001f;
             gapSegment.color = new Vector4(0, 0, 0, 0);
 
             // check if data can be combined
@@ -180,8 +179,7 @@ public class Snake
 
     public void Kill()
     {
-        Score += AllSnakes.Count - AliveSnakes.Count;
-        OnScoreChanged?.Invoke(Score);
+        Score.IncreaseScore(AllSnakes.Count - AliveSnakes.Count);
         AliveSnakes.Remove(this);
         Debug.Log(Color + " ded!");
     }
