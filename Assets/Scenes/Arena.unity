@@ -5420,6 +5420,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ViewManager: {fileID: 474593302}
+  Arena: {fileID: 3615672}
 --- !u!1 &1978999666
 GameObject:
   m_ObjectHideFlags: 0

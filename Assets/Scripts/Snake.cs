@@ -60,10 +60,35 @@ public class Snake
         FireAction.started += c => Ability.Activate();
     }
 
-    public void Spawn(int arenaPixelWidth, int arenaPixelHeight, int borderWidth)
+    public void Spawn(int arenaPixelWidth, int arenaPixelHeight)
     {
-        Position = new Vector2(UnityEngine.Random.Range(0 + borderWidth, arenaPixelWidth - borderWidth), UnityEngine.Random.Range(0 + borderWidth, arenaPixelHeight - borderWidth));
-        Direction = UnityEngine.Random.insideUnitCircle.normalized;
+        // Pos
+        Position = new Vector2(UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelWidth - Thickness * 2), UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelHeight - Thickness * 2));
+        // don't spawn too close to another snake
+        float tooClose = 0.2f * arenaPixelWidth;
+        int maxTries = 10;
+        int currentTry = 0;
+        while(currentTry < maxTries)
+        {
+            float minDist = Mathf.Infinity;
+            foreach(var snake in AliveSnakes)
+            {
+                float dist = Vector2.Distance(Position, snake.Position);
+                minDist = Mathf.Min(dist, minDist);
+            }
+            if(minDist > tooClose)
+            {
+                break;
+            }
+            Position = new Vector2(UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelWidth - Thickness * 2), UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelHeight - Thickness * 2));
+            currentTry++;
+        }
+
+        // Dir
+        //Direction = UnityEngine.Random.insideUnitCircle.normalized;
+        Vector2 center = new Vector2(arenaPixelWidth / 2, arenaPixelHeight / 2);
+        Direction = (center - Position).normalized;
+
         Ability.SetUses(Score.Place);
 
         LeftAction.Enable();
@@ -182,6 +207,12 @@ public class Snake
         Score.IncreaseScore(AllSnakes.Count - AliveSnakes.Count);
         AliveSnakes.Remove(this);
         Debug.Log(Color + " ded!");
+    }
+
+    public void Reset()
+    {
+        Ability = new EraserAbility(this);
+        Score = new SnakeScore();
     }
 
     public void Delete()

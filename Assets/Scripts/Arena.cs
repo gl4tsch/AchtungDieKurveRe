@@ -35,13 +35,14 @@ public class Arena : MonoBehaviour
         lineBuffer = null;
     }
 
-    private IEnumerator Start()
+    public void ResetArena()
     {
         PrepareRenderTex();
-
-        yield return new WaitForSeconds(1);
-
-        StartGame();
+        foreach(var snake in Snake.AllSnakes)
+        {
+            snake.Reset();
+        }
+        StartRound();
     }
 
     private void PrepareRenderTex()
@@ -61,6 +62,11 @@ public class Arena : MonoBehaviour
         cs.SetInt("_Height", pixelHeight);
         cs.SetInt("_SnakeCount", Snake.AllSnakes.Count);
 
+        ClearArenaTex();
+    }
+
+    private void ClearArenaTex()
+    {
         // fill arena border
         cs.Dispatch(1, pixelWidth / 8, pixelHeight / 8, 1);
     }
@@ -72,6 +78,7 @@ public class Arena : MonoBehaviour
         if (Snake.AliveSnakes.Count <= 1)
         {
             EndRound();
+            StartRound();
             return;
         }
 
@@ -134,18 +141,19 @@ public class Arena : MonoBehaviour
         }
     }
 
-    void StartGame()
+    void StartRound()
     {
+        ClearArenaTex();
+
         foreach (var snake in Snake.AllSnakes)
         {
-            int travelInASec = (int)Settings.Instance.SnakeSpeed.Value;
-            snake.Spawn(pixelWidth, pixelHeight, travelInASec);
+            snake.Spawn(pixelWidth, pixelHeight);
         }
 
         gameRunning = true;
     }
 
-    private void EndRound()
+    public void EndRound()
     {
         gameRunning = false;
 
@@ -153,8 +161,6 @@ public class Arena : MonoBehaviour
         {
             Snake.AliveSnakes[i].Kill();
         }
-
-        StartCoroutine(Start());
     }
 
     Snake GetSnakeByColor(Color col)
