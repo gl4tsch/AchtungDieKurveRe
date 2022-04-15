@@ -211,8 +211,8 @@ public class Snake
 
     public void Reset()
     {
-        Ability = new EraserAbility(this);
         Score = new SnakeScore();
+        Ability.SetUses(Score.Place);
     }
 
     public void Delete()

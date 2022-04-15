@@ -78,7 +78,7 @@ public class Arena : MonoBehaviour
         if (Snake.AliveSnakes.Count <= 1)
         {
             EndRound();
-            StartRound();
+            StartCoroutine(StartRoundAfterInput());
             return;
         }
 
@@ -139,6 +139,12 @@ public class Arena : MonoBehaviour
                 snake.Kill();
             }
         }
+    }
+
+    IEnumerator StartRoundAfterInput()
+    {
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+        StartRound();
     }
 
     void StartRound()

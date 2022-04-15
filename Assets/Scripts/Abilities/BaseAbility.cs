@@ -26,9 +26,9 @@ public class BaseAbility
     {
         if (uses > 0)
         {
+            Perform();
             uses--;
             OnUsesChanged?.Invoke(Uses);
-            Perform();
         }
     }
 

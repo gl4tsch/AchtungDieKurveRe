@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SnakeScore : MonoBehaviour
+public class SnakeScore
 {
     public int Score { get; private set; }
     public int Place { get; private set; }
@@ -20,6 +20,11 @@ public class SnakeScore : MonoBehaviour
         SortScoresUpdatePlacing();
     }
 
+    ~SnakeScore()
+    {
+        SortedScores?.Remove(this);
+    }
+
     public void IncreaseScore(int value)
     {
         Score += value;
@@ -31,7 +36,6 @@ public class SnakeScore : MonoBehaviour
     {
         // sort
         SortedScores.Sort((a, b) => b.Score - a.Score); // descending
-        //SortedScores.Reverse(); // descending
 
         int place = 1;
         // this goes from first to last

@@ -10,6 +10,7 @@ public class UI_LobbySnake : MonoBehaviour
     [SerializeField] TMP_InputField nameInput;
     [SerializeField] TextMeshProUGUI nameText;
     [SerializeField] TextMeshProUGUI leftButtonText, rightButtonText, fireButtonText;
+    [SerializeField] TMP_Dropdown abilityDropdown;
 
     public Snake Snake { get; private set; }
     public int SnakeIdx => Snake.AllSnakes.IndexOf(Snake);
@@ -17,11 +18,21 @@ public class UI_LobbySnake : MonoBehaviour
     public void Init(Snake snake)
     {
         Snake = snake;
+
         nameInput.text = snake.Name;
         nameText.color = snake.Color;
+
         leftButtonText.text = snake.LeftAction.bindings[0].ToDisplayString();
         rightButtonText.text = snake.RightAction.bindings[0].ToDisplayString();
         fireButtonText.text = snake.FireAction.bindings[0].ToDisplayString();
+
+        abilityDropdown.options = new List<TMP_Dropdown.OptionData>()
+        {
+             new TMP_Dropdown.OptionData("Eraser"),
+             new TMP_Dropdown.OptionData("TBar")
+        };
+        abilityDropdown.RefreshShownValue();
+        //abilityDropdown.onValueChanged.AddListener(SelectAbility);
     }
 
     public void OnNameInput(string name)
@@ -69,6 +80,18 @@ public class UI_LobbySnake : MonoBehaviour
            });
 
         rebindOp.Start();
+    }
+
+    public void SelectAbility(int i)
+    {
+        if(i == 0)
+        {
+            Snake.Ability = new EraserAbility(Snake);
+        }
+        else
+        {
+            Snake.Ability = new TBarAbility(Snake);
+        }
     }
 
     public void Remove()
