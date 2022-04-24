@@ -20,9 +20,17 @@ public class SnakeScore
         SortScoresUpdatePlacing();
     }
 
-    ~SnakeScore()
+    public void Reset()
     {
-        SortedScores?.Remove(this);
+        Score = 0;
+        OnScoreChanged?.Invoke(this);
+        SortScoresUpdatePlacing();
+    }
+
+    public void Delete()
+    {
+        SortedScores.Remove(this);
+        SortScoresUpdatePlacing();
     }
 
     public void IncreaseScore(int value)

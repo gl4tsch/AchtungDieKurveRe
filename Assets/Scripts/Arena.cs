@@ -24,7 +24,7 @@ public class Arena : MonoBehaviour
     private void OnEnable()
     {
         snakeBuffer = new ComputeBuffer(Snake.AllSnakes.Count, sizeof(float) * 9 + sizeof(int));
-        lineBuffer = new ComputeBuffer(Snake.AllSnakes.Count * maxAdditionalLinesDrawnEachFramePerSnake, sizeof(float) * 9);
+        lineBuffer = new ComputeBuffer(Snake.AllSnakes.Count * maxAdditionalLinesDrawnEachFramePerSnake, sizeof(float) * 9 + sizeof(int));
     }
 
     private void OnDisable()
@@ -150,6 +150,7 @@ public class Arena : MonoBehaviour
     void StartRound()
     {
         ClearArenaTex();
+        lineDrawDataBuffer.Clear();
 
         foreach (var snake in Snake.AllSnakes)
         {

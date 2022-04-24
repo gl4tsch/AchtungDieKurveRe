@@ -35,7 +35,7 @@ public class Snake
     Vector2 prevPos;
 
     // Gap
-    Stack<LineDrawData> gapDrawBuffer = new Stack<LineDrawData>();
+    Stack<LineDrawData> gapSegmentBuffer = new Stack<LineDrawData>();
     float distSinceLastGap = 0;
 
     List<LineDrawData> injectionDrawBuffer = new List<LineDrawData>();
@@ -62,6 +62,9 @@ public class Snake
 
     public void Spawn(int arenaPixelWidth, int arenaPixelHeight)
     {
+        gapSegmentBuffer.Clear();
+        injectionDrawBuffer.Clear();
+
         // Pos
         Position = new Vector2(UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelWidth - Thickness * 2), UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelHeight - Thickness * 2));
         // don't spawn too close to another snake
@@ -127,16 +130,17 @@ public class Snake
             var gapSegment = new LineDrawData();
             gapSegment.thickness = (Thickness + 4f) / arenaWidth;
             gapSegment.color = new Vector4(0, 0, 0, 0);
+            gapSegment.clipCircle = 1; // clip gap around start
 
             // check if data can be combined
             // TODO: unspaghetti
-            if(gapDrawBuffer.Count > 0)
+            if (gapSegmentBuffer.Count > 0)
             {
-                var lastSegment = gapDrawBuffer.Peek();
+                var lastSegment = gapSegmentBuffer.Peek();
 
-                if (Vector2.Angle(lastSegment.UVPosB - lastSegment.UVPosA, prevUVPos - newUVPos) < 0.01)
+                if (Vector2.Angle(lastSegment.UVPosB - lastSegment.UVPosA, newUVPos - prevUVPos) < 0.0001)
                 {
-                    gapDrawBuffer.Pop();
+                    gapSegmentBuffer.Pop();
 
                     gapSegment.UVPosA = lastSegment.UVPosA;
                     gapSegment.UVPosB = newUVPos;
@@ -149,11 +153,12 @@ public class Snake
             }
             else
             {
+                // first gap segment
                 gapSegment.UVPosA = prevUVPos;
                 gapSegment.UVPosB = newUVPos;
             }
 
-            gapDrawBuffer.Push(gapSegment);
+            gapSegmentBuffer.Push(gapSegment);
         }
     }
 
@@ -189,8 +194,13 @@ public class Snake
         // Gap end
         if(distSinceLastGap > GapFrequency + GapWidth)
         {
-            data.AddRange(gapDrawBuffer);
-            gapDrawBuffer.Clear();
+            // clip end of gap
+            var lastSegment = gapSegmentBuffer.Pop();
+            lastSegment.clipCircle = lastSegment.clipCircle == 1 ? 3 : 2;
+            gapSegmentBuffer.Push(lastSegment);
+
+            data.AddRange(gapSegmentBuffer);
+            gapSegmentBuffer.Clear();
             distSinceLastGap -= GapFrequency + GapWidth;
         }
 
@@ -211,7 +221,7 @@ public class Snake
 
     public void Reset()
     {
-        Score = new SnakeScore();
+        Score.Reset();
         Ability.SetUses(Score.Place);
     }
 
@@ -240,5 +250,6 @@ public class Snake
         public Vector2 UVPosA, UVPosB;
         public float thickness;
         public Vector4 color;
+        public int clipCircle; // 0 = no clip; 1 = circle around a; 2 = circle around b; 3 = circle around both
     }
 }

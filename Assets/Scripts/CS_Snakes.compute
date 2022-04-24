@@ -7,7 +7,7 @@ struct SnakeData
     float2 prevPos, newPos;
     float thickness;
     float4 color;
-    int collision;
+    int collision; // bool
 };
 
 struct LineData
@@ -15,6 +15,7 @@ struct LineData
     float2 posA, posB;
     float thickness;
     float4 color;
+    int clipCircle; // 0 = no clip; 1 = circle around a; 2 = circle around b; 3 = circle around both
 };
 
 // Create a RenderTexture with enableRandomWrite flag and set it
@@ -85,8 +86,18 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         float distToSegment = sdSegment(uv, _Lines[i].posA, _Lines[i].posB);
 
         // if this pixel is part of the current segment
-        if (distToSegment <= _Snakes[i].thickness / 2)
+        if (distToSegment <= _Lines[i].thickness / 2)
         {
+            // clip circle
+            if ((_Lines[i].clipCircle == 1 || _Lines[i].clipCircle == 3) && length(_Snakes[i].prevPos - uv) <= _Lines[i].thickness / 2)
+            {
+                continue;
+            }
+            else if ((_Lines[i].clipCircle == 2 || _Lines[i].clipCircle == 3) && length(_Snakes[i].newPos - uv) <= _Lines[i].thickness / 2)
+            {
+                continue;
+            }
+            
             // fill pixel
             Arena[id.xy] = _Lines[i].color;
         }

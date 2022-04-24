@@ -14,17 +14,27 @@ public class UI_ViewManager : MonoBehaviour
 
     public void ChangeView(System.Type viewType)
     {
-        // first disable
-        foreach(UI_View view in views)
+        if (!viewType.IsSubclassOf(typeof(UI_View)))
         {
-            view.gameObject.SetActive(false);
+            Debug.LogError($"{viewType} is not a subclass of UI_View.");
+            return;
         }
 
-        // then enable
         UI_View v = views.FirstOrDefault((v) => v.GetType() == viewType);
+
         if (v != null)
         {
+            // first disable
+            foreach (UI_View view in views)
+            {
+                view.gameObject.SetActive(false);
+            }
+            // then enable
             v.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError($"no view of type {viewType} found in {views}.");
         }
     }
 }

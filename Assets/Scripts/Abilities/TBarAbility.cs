@@ -17,6 +17,7 @@ public class TBarAbility : BaseAbility
         tbar.UVPosB = UVAnchorPos + tLength / 2 * -Vector2.Perpendicular(mySnake.Direction);
         tbar.thickness = mySnake.Thickness;
         tbar.color = mySnake.Color;
+        tbar.clipCircle = 0;
 
         mySnake.InjectLineDrawData(new List<Snake.LineDrawData> { tbar });
     }
