@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EraserAbility : BaseAbility
 {
-    float eraseLength = 0.1f;
+    float eraseLength = 0.13f;
     int erasePixelLength => (int)(eraseLength * Settings.Instance.ArenaWidth.Value);
 
     public EraserAbility(Snake snake) : base(snake) { }
@@ -15,8 +15,9 @@ public class EraserAbility : BaseAbility
         var erase = new Snake.LineDrawData();
         erase.UVPosA = mySnake.Position / arenaWidth;
         erase.UVPosB = erase.UVPosA + mySnake.Direction.normalized * eraseLength;
-        erase.thickness = mySnake.Thickness;
+        erase.thickness = mySnake.Thickness / arenaWidth;
         erase.color = new Color(0, 0, 0, 0);
+        erase.clipCircle = 1;
         mySnake.InjectLineDrawData(new List<Snake.LineDrawData> { erase });
     }
 }
