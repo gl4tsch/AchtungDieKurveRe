@@ -51,7 +51,7 @@ float sdArc( float2 p, float2 sc, float ra, float rb )
 }
 
 [numthreads(8,8,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void CSMain (uint2 id : SV_DispatchThreadID)
 {
     // current pixel in uv space
     float2 uv = float2((float) id.x / _Width, (float) id.y / _Height);
@@ -60,7 +60,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     for (int i = 0; i < _SnakeCount; i++)
     {
         float distToSegment = sdSegment(uv, _Snakes[i].prevPos, _Snakes[i].newPos);
-        //float d = sdArc(uv, -0.0001, _Snakes[i].newPos, _Snakes[i].prevPos); // how on earth
 
         // to avoid self-collision
         float distToStart = length(_Snakes[i].prevPos - uv);
@@ -69,14 +68,14 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         if (distToSegment <= _Snakes[i].thickness / 2)
         {
             // if the pixel is not the end of same snake from previous frame && the pixel has a value already
-            if (distToStart > _Snakes[i].thickness / 2 && Arena[id.xy].a > 0)
+            if (distToStart > _Snakes[i].thickness / 2 && Arena[id].a > 0)
             {
                 // COLLISION
                 _Snakes[i].collision = 1;
             }
 
             // fill pixel
-            Arena[id.xy] = _Snakes[i].color;
+            Arena[id] = _Snakes[i].color;
         }
     }
 
@@ -98,14 +97,17 @@ void CSMain (uint3 id : SV_DispatchThreadID)
                 continue;
             }
             
-            // fill pixel
-            Arena[id.xy] = _Lines[i].color;
+            // fill pixel but not arena border
+            if (any((1, 1, 1, 1) - Arena[id]))
+            {
+                Arena[id] = _Lines[i].color;
+            }
         }
     }
 }
 
 [numthreads(8,8,1)]
-void CSBorder (uint3 id : SV_DispatchThreadID)
+void CSBorder (uint2 id : SV_DispatchThreadID)
 {
     float2 uv = float2 ((float)id.x/_Width , (float)id.y/_Height);
     float normBorderX = 2.0/_Width;
@@ -113,10 +115,10 @@ void CSBorder (uint3 id : SV_DispatchThreadID)
 
     if(uv.x <= normBorderX || uv.x >= 1-normBorderX || uv.y <= normBorderY || uv.y >= 1-normBorderY)
     {
-        Arena[id.xy] = float4(1,1,1,1);
+        Arena[id] = float4(1, 1, 1, 1);
     }
     else
     {
-        Arena[id.xy] = float4(0,0,0,0);
+        Arena[id] = float4(0, 0, 0, 0);
     }
 }
