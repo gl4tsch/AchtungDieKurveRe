@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StateMachine<T> where T : class
+public class StateMachineBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
     public abstract class BaseState
     {
@@ -13,7 +13,7 @@ public class StateMachine<T> where T : class
 
     protected BaseState currentState;
 
-    public virtual void Update()
+    protected virtual void Update()
     {
         if (currentState != null)
         {

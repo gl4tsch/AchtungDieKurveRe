@@ -154,7 +154,7 @@ public class Arena : MonoBehaviour
 
         foreach (var snake in Snake.AllSnakes)
         {
-            snake.Spawn(pixelWidth, pixelHeight);
+            snake.Spawn();
         }
 
         gameRunning = true;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Snake
+public partial class Snake : StateMachine<Snake>
 {
     public string Name;
     public Vector2 Position { get; private set; } // in pixel
@@ -31,12 +31,11 @@ public class Snake
     public static List<Snake> AllSnakes = new List<Snake>(); // this has to go somewhere else at some point
     public static List<Snake> AliveSnakes = new List<Snake>();
 
+    public BaseState AliveState { get; private set; } = new AliveSnakeState();
+    public BaseState DeadState { get; private set; } = new DeadSnakeState();
+
     int turnSign = 0; // 0 => no turn; -1 => clockwise; 1 => counter clockwise
     Vector2 prevPos;
-
-    // Gap
-    Stack<LineDrawData> gapSegmentBuffer = new Stack<LineDrawData>();
-    float distSinceLastGap = 0;
 
     List<LineDrawData> injectionDrawBuffer = new List<LineDrawData>();
 
@@ -58,108 +57,35 @@ public class Snake
         RightAction.canceled += c => turnSign++;
         FireAction = new InputAction("fire", binding: "<Keyboard>/s");
         FireAction.started += c => Ability.Activate();
+
+        ChangeState(DeadState);
     }
 
-    public void Spawn(int arenaPixelWidth, int arenaPixelHeight)
+    public void Spawn()
     {
-        gapSegmentBuffer.Clear();
-        injectionDrawBuffer.Clear();
+        ChangeState(AliveState);
+    }
 
-        // Pos
-        Position = new Vector2(UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelWidth - Thickness * 2), UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelHeight - Thickness * 2));
-        // don't spawn too close to another snake
-        float tooClose = 0.2f * arenaPixelWidth;
-        int maxTries = 10;
-        int currentTry = 0;
-        while(currentTry < maxTries)
-        {
-            float minDist = Mathf.Infinity;
-            foreach(var snake in AliveSnakes)
-            {
-                float dist = Vector2.Distance(Position, snake.Position);
-                minDist = Mathf.Min(dist, minDist);
-            }
-            if(minDist > tooClose)
-            {
-                break;
-            }
-            Position = new Vector2(UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelWidth - Thickness * 2), UnityEngine.Random.Range(0 + Thickness * 2, arenaPixelHeight - Thickness * 2));
-            currentTry++;
-        }
+    public void Kill()
+    {
+        ChangeState(DeadState);
+    }
 
-        // Dir
-        //Direction = UnityEngine.Random.insideUnitCircle.normalized;
-        Vector2 center = new Vector2(arenaPixelWidth / 2, arenaPixelHeight / 2);
-        Direction = (center - Position).normalized;
-
+    public void Reset()
+    {
+        Score.Reset();
         Ability.SetUses(Score.Place);
-
-        LeftAction.Enable();
-        RightAction.Enable();
-        FireAction.Enable();
-        AliveSnakes.Add(this);
-        Debug.Log(Color + " alive!");
     }
 
-    public void Update()
+    public void Delete()
     {
-        UpdatePosition();
-        UpdateGap();
-    }
-
-    void UpdatePosition()
-    {
-        prevPos = Position;
-        float degrees = TurnRate * turnSign * Time.deltaTime;
-        Direction = Quaternion.Euler(0, 0, degrees) * Direction;
-        Position += Direction * Speed * Time.deltaTime;
-    }
-
-    void UpdateGap()
-    {
-        distSinceLastGap += Vector2.Distance(prevPos, Position);
-
-        if(distSinceLastGap > GapFrequency)
+        if(AliveSnakes.Contains(this))
         {
-            // add to gap buffer
-            var arenaWidth = Settings.Instance.ArenaWidth.Value;
-
-            var prevUVPos = prevPos / arenaWidth; //(Position - Direction * Settings.Instance.SnakeGapWidth) / arenaWidth;
-            var newUVPos = Position / arenaWidth;
-
-            var gapSegment = new LineDrawData();
-            gapSegment.thickness = (Thickness + 4f) / arenaWidth;
-            gapSegment.color = new Vector4(0, 0, 0, 0);
-            gapSegment.clipCircle = 1; // clip gap around start
-
-            // check if data can be combined
-            // TODO: unspaghetti
-            if (gapSegmentBuffer.Count > 0)
-            {
-                var lastSegment = gapSegmentBuffer.Peek();
-
-                if (Vector2.Angle(lastSegment.UVPosB - lastSegment.UVPosA, newUVPos - prevUVPos) < 0.0001)
-                {
-                    gapSegmentBuffer.Pop();
-
-                    gapSegment.UVPosA = lastSegment.UVPosA;
-                    gapSegment.UVPosB = newUVPos;
-                }
-                else
-                {
-                    gapSegment.UVPosA = prevUVPos;
-                    gapSegment.UVPosB = newUVPos;
-                }
-            }
-            else
-            {
-                // first gap segment
-                gapSegment.UVPosA = prevUVPos;
-                gapSegment.UVPosB = newUVPos;
-            }
-
-            gapSegmentBuffer.Push(gapSegment);
+            AliveSnakes.Remove(this);
         }
+
+        AllSnakes.Remove(this);
+        Debug.Log(Color + " deleted!");
     }
 
     public SnakeDrawData GetSnakeDrawData()
@@ -191,44 +117,12 @@ public class Snake
         data.AddRange(injectionDrawBuffer);
         injectionDrawBuffer.Clear();
 
-        // Gap end
-        if(distSinceLastGap > GapFrequency + GapWidth)
-        {
-            // clip end of gap
-            var lastSegment = gapSegmentBuffer.Pop();
-            lastSegment.clipCircle = lastSegment.clipCircle == 1 ? 3 : 2;
-            gapSegmentBuffer.Push(lastSegment);
-
-            data.AddRange(gapSegmentBuffer);
-            gapSegmentBuffer.Clear();
-            distSinceLastGap -= GapFrequency + GapWidth;
-        }
-
         return data;
     }
 
     public void InjectLineDrawData(List<LineDrawData> lineDrawData)
     {
         injectionDrawBuffer.AddRange(lineDrawData);
-    }
-
-    public void Kill()
-    {
-        Score.IncreaseScore(AllSnakes.Count - AliveSnakes.Count);
-        AliveSnakes.Remove(this);
-        Debug.Log(Color + " ded!");
-    }
-
-    public void Reset()
-    {
-        Score.Reset();
-        Ability.SetUses(Score.Place);
-    }
-
-    public void Delete()
-    {
-        AllSnakes.Remove(this);
-        Debug.Log(Color + " deleted!");
     }
 
     /// <summary>

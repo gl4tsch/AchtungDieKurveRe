@@ -21,6 +21,6 @@ public class UI_PrepView : UI_View
 
     public void OnPlayButton()
     {
-        GameStateMachine.Instance.ChangeState(new ArenaState());
+        GameStateMachine.Instance.ChangeState(new ArenaGameState());
     }
 }

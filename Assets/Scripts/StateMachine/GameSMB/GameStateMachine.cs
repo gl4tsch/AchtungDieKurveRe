@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameStateMachine : StateMachine<GameStateMachine>
+public class GameStateMachine : StateMachineBehaviour<GameStateMachine>
 {
     [SerializeField] public UI_ViewManager ViewManager;
     [SerializeField] public Arena Arena;
@@ -23,6 +23,6 @@ public class GameStateMachine : StateMachine<GameStateMachine>
 
     void Start()
     {
-        ChangeState(new SetupState());
+        ChangeState(new SetupGameState());
     }
 }
