@@ -8,7 +8,11 @@ public partial class Snake
     {
         public override void OnEnter()
         {
+            Context.LeftAction.Disable();
+            Context.RightAction.Disable();
+            Context.FireAction.Disable();
 
+            Debug.Log(Context.Color + " ded!");
         }
 
         public override void OnExit()

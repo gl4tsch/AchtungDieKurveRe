@@ -15,7 +15,7 @@ public class TBarAbility : BaseAbility
         var UVAnchorPos = (mySnake.Position - mySnake.Direction * mySnake.Thickness) / arenaWidth;
         tbar.UVPosA = UVAnchorPos + tLength / 2 * Vector2.Perpendicular(mySnake.Direction);
         tbar.UVPosB = UVAnchorPos + tLength / 2 * -Vector2.Perpendicular(mySnake.Direction);
-        tbar.thickness = mySnake.Thickness;
+        tbar.thickness = mySnake.Thickness / arenaWidth;
         tbar.color = mySnake.Color;
         tbar.clipCircle = 0;
 

@@ -135,7 +135,6 @@ public partial class Snake
         {
             Context.Score.IncreaseScore(AllSnakes.Count - AliveSnakes.Count);
             AliveSnakes.Remove(Context);
-            Debug.Log(Context.Color + " ded!");
         }
     }
 }
