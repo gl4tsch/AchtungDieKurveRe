@@ -2,25 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArenaGameState : GameStateMachine.BaseState
+public partial class GameStateMachine
 {
-    public override void OnEnter()
+    private class ArenaGameState : BaseState
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Context.Arena.ResetArena();
-        Context.ViewManager.ChangeView(typeof(UI_ArenaView));
-    }
+        Arena arena => Context.Arena;
 
-    public override void OnUpdate()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        public override void OnEnter()
         {
-            Context.ChangeState(new SetupGameState());
+            Cursor.lockState = CursorLockMode.Locked;
+            arena.ResetArena();
+            Context.ViewManager.ChangeView(typeof(UI_ArenaView));
         }
-    }
 
-    public override void OnExit()
-    {
-        Context.Arena.EndRound();
+        public override void OnUpdate()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Context.ChangeState(Context.SetupState);
+            }
+        }
+
+        public override void OnExit()
+        {
+            arena.EndRound();
+        }
     }
 }

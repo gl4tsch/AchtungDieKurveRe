@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameStateMachine : StateMachineBehaviour<GameStateMachine>
+public partial class GameStateMachine : StateMachineBehaviour<GameStateMachine>
 {
-    [SerializeField] public UI_ViewManager ViewManager;
-    [SerializeField] public Arena Arena;
+    [SerializeField] UI_ViewManager ViewManager;
+    [SerializeField] Arena Arena;
 
-    public static GameStateMachine Instance { get; private set; } // this should probably not be a singleton but oh well
+    public static GameStateMachine Instance { get; private set; } // this should probably not be a singleton
+
+    public BaseState SetupState = new SetupGameState();
+    public BaseState ArenaState = new ArenaGameState();
 
     void Awake()
     {

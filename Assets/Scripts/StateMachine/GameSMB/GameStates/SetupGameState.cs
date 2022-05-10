@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SetupGameState : GameStateMachine.BaseState
+public partial class GameStateMachine
 {
-    public override void OnEnter()
+    private class SetupGameState : BaseState
     {
-        Cursor.lockState = CursorLockMode.None;
-        Context.ViewManager.ChangeView(typeof(UI_PrepView));
+        public override void OnEnter()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Context.ViewManager.ChangeView(typeof(UI_PrepView));
+        }
+
+        public override void OnUpdate() { }
+
+        public override void OnExit() { }
     }
-
-    public override void OnUpdate() { }
-
-    public override void OnExit() { }
 }

@@ -88,6 +88,12 @@ public partial class Snake : StateMachine<Snake>
         Debug.Log(Color + " deleted!");
     }
 
+    public void Teleport(Vector2 position)
+    {
+        Position = position;
+        prevPos = position;
+    }
+
     public SnakeDrawData GetSnakeDrawData()
     {
         var arenaWidth = Settings.Instance.ArenaWidth.Value;
@@ -144,6 +150,10 @@ public partial class Snake : StateMachine<Snake>
         public Vector2 UVPosA, UVPosB;
         public float thickness;
         public Vector4 color;
-        public int clipCircle; // 0 = no clip; 1 = circle around a; 2 = circle around b; 3 = circle around both
+
+        /// <summary>
+        /// 0 = no clip; 1 = circle around a; 2 = circle around b; 3 = circle around both
+        /// </summary>
+        public int clipCircle;
     }
 }
