@@ -20,9 +20,9 @@ public partial class Snake : StateMachine<Snake>
     public SnakeScore Score;
     public BaseAbility Ability;
 
-    public float ThicknessModifier { get; private set; } = 1f;
-    public float SpeedModifier { get; private set; } = 1f;
-    public float TurnRateModifier { get; private set; } = 1f;
+    public float ThicknessModifier { get; set; } = 1f;
+    public float SpeedModifier { get; set; } = 1f;
+    public float TurnRateModifier { get; set; } = 1f;
 
     public InputAction LeftAction { get; private set; }
     public InputAction RightAction { get; private set; }

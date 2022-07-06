@@ -30,7 +30,8 @@ public class UI_LobbySnake : MonoBehaviour
         {
              new TMP_Dropdown.OptionData("Eraser"),
              new TMP_Dropdown.OptionData("TBar"),
-             new TMP_Dropdown.OptionData("Jump")
+             new TMP_Dropdown.OptionData("Jump"),
+             new TMP_Dropdown.OptionData("Boost")
         };
         abilityDropdown.RefreshShownValue();
         //abilityDropdown.onValueChanged.AddListener(SelectAbility);
@@ -93,9 +94,13 @@ public class UI_LobbySnake : MonoBehaviour
         {
             Snake.Ability = new TBarAbility(Snake);
         }
-        else
+        else if(i == 2)
         {
             Snake.Ability = new JumpAbility(Snake);
+        }
+        else
+        {
+            Snake.Ability = new BoostAbility(Snake);
         }
     }
 

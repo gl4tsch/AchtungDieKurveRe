@@ -35,4 +35,9 @@ public class BaseAbility
     protected virtual void Perform()
     {
     }
+
+    public virtual void Stop()
+    {
+        
+    }
 }

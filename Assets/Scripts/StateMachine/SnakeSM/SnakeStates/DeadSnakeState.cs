@@ -12,6 +12,8 @@ public partial class Snake
             Context.RightAction.Disable();
             Context.FireAction.Disable();
 
+            Context.Ability.Stop();
+
             Debug.Log(Context.Color + " ded!");
         }
 
