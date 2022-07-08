@@ -74,6 +74,7 @@ public partial class Snake : StateMachine<Snake>
     public void Reset()
     {
         Score.Reset();
+        Ability.Stop();
         Ability.SetUses(Score.Place);
     }
 

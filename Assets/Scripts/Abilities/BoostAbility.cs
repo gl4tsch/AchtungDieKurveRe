@@ -14,22 +14,22 @@ public class BoostAbility : BaseAbility
     public BoostAbility(Snake snake) : base(snake)
     {
         boostTimer = new Timer(boostDuration);
+        boostTimer.AutoReset = false;
         boostTimer.Elapsed += new ElapsedEventHandler(OnBoostEnd);
     }
 
     protected override void Perform()
     {
         Debug.Log("Mopsgeschwindigkeit!");
-        boostTimer.Stop();
         mySnake.SpeedModifier = boostSpeedModifier;
         mySnake.TurnRateModifier = boostTurnRateModifier;
+        boostTimer.Stop();
         boostTimer.Start();
     }
 
     void OnBoostEnd(object sender, ElapsedEventArgs e)
     {
         Debug.Log("Boost End");
-        boostTimer.Stop();
         mySnake.SpeedModifier = 1;
         mySnake.TurnRateModifier = 1;
     }
@@ -38,5 +38,6 @@ public class BoostAbility : BaseAbility
     {
         base.Stop();
         boostTimer.Stop();
+        OnBoostEnd(null, null);
     }
 }
